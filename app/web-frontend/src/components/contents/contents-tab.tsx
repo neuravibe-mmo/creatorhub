@@ -18,7 +18,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Download, Heart, MessageSquare, Video, Image, CheckSquare, Square, Search } from "lucide-react";
+import { Download, Heart, MessageSquare, Video, Image as ImageIcon, CheckSquare, Square, Search } from "lucide-react";
 import { timeAgo } from "@/lib/utils";
 import { useTranslation } from "@/i18n";
 
@@ -190,7 +190,7 @@ export function ContentsTab() {
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-[#778094]">
-                      {item.media_type === "video" ? <Video className="w-8 h-8" /> : <Image className="w-8 h-8" />}
+                      {item.media_type === "video" ? <Video className="w-8 h-8" /> : <ImageIcon className="w-8 h-8" />}
                     </div>
                   )}
                 </div>

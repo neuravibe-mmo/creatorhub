@@ -15,7 +15,7 @@ import {
   Trash2,
   RefreshCw,
   Film,
-  Image,
+  Image as ImageIcon,
   FileText,
   Folder,
   ChevronLeft,
@@ -687,7 +687,7 @@ export function ShareDownloadTab() {
                             <img src={cover} alt="" className="w-full h-full object-cover" />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center text-[#778094]">
-                              {isVideo ? <Film className="w-4 h-4" /> : <Image className="w-4 h-4" />}
+                              {isVideo ? <Film className="w-4 h-4" /> : <ImageIcon className="w-4 h-4" />}
                             </div>
                           )}
                         </div>

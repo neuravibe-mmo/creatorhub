@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
-import { setTasks, setLoading, closeCrossPlatformModal } from "@/store/slices/publishSlice";
+import { setTasks, setLoading } from "@/store/slices/publishSlice";
 import { addToast, incrementBusy, decrementBusy } from "@/store/slices/uiSlice";
 import { api } from "@/lib/api";
 import { PublishTask } from "@/types";
@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input, Textarea } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Send, Upload, Sparkles, Hash } from "lucide-react";
+import { Send, Hash } from "lucide-react";
 import { timeAgo } from "@/lib/utils";
 import { useTranslation } from "@/i18n";
 
@@ -33,7 +33,7 @@ export function PublishTab() {
     try {
       const data = await api<PublishTask[]>(`/api/publish/tasks?platform=${currentPlatform}`);
       dispatch(setTasks(data || []));
-    } catch {} finally {
+    } catch { } finally {
       dispatch(setLoading(false));
     }
   };

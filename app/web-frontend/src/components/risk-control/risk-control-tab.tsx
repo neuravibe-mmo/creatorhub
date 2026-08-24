@@ -13,17 +13,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import {
   Shield,
   RefreshCw,
-  Zap,
   Check,
-  AlertTriangle,
-  History,
   Info,
-  ExternalLink,
-  Lock,
-  Radio,
   Sliders,
-  Clock,
-  Activity,
 } from "lucide-react";
 import { timeAgo } from "@/lib/utils";
 import { RiskAccountItem } from "@/types";
@@ -118,7 +110,7 @@ export function RiskControlTab() {
         dispatch(setRiskConfig(cfg));
         fillConfigState(cfg);
       }
-    } catch {}
+    } catch { }
   };
 
   const fillConfigState = (cfg: any) => {
@@ -456,9 +448,9 @@ export function RiskControlTab() {
                   const progress =
                     riskLevelNum > 0
                       ? Math.min(
-                          100,
-                          Math.round(((a.recovery_successes || 0) * 100) / Math.max(1, a.recovery_target || 1))
-                        )
+                        100,
+                        Math.round(((a.recovery_successes || 0) * 100) / Math.max(1, a.recovery_target || 1))
+                      )
                       : 100;
 
                   return (
