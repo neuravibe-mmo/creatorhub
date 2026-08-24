@@ -252,6 +252,8 @@ export const zhCN = {
     videoTitle: "视频标题",
     danmakuCount: "弹幕数量",
     timeline: "时间轴分布",
+    countText: "{count} 条弹幕",
+    urlPlaceholder: "输入视频播放链接",
   },
   publish: {
     title: "发布笔记 / 作品",
@@ -266,6 +268,8 @@ export const zhCN = {
     titlePlaceholder: "输入作品标题",
     contentPlaceholder: "输入正文内容或文案描述...",
     tagsPlaceholder: "例如: 探店, 美食, 生活记录 (空格或逗号分隔)",
+    fillRequired: "请填写标题并选择发布账号",
+    noDesc: "无描述",
   },
   autocomment: {
     title: "自动评论",
@@ -418,6 +422,15 @@ export const zhCN = {
     auth: "用户名/密码 (可选)",
     latency: "延迟",
     testLatency: "测速",
+    autoBalance: "自动均衡分配",
+    boundAccounts: "绑定的账号数: {count}",
+    urlPlaceholder: "http://user:pass@host:port 或 socks5://host:port",
+    statuses: {
+      testing: "测试中...",
+      ok: "畅通",
+      failed: "超时",
+      untested: "未测",
+    },
   },
   risk: {
     normalAccounts: "正常账号",

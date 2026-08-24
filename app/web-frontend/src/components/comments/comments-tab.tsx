@@ -64,7 +64,7 @@ export function CommentsTab() {
 
   const handleAddWatch = async () => {
     if (!watchUrl.trim()) return;
-    dispatch(incrementBusy("正在添加作品评论监控..."));
+    dispatch(incrementBusy());
     try {
       await api("/api/comment-watches", {
         method: "POST",
@@ -83,7 +83,7 @@ export function CommentsTab() {
 
   const handleSendReply = async () => {
     if (!replyText.trim() || !replyModal.comment) return;
-    dispatch(incrementBusy("正在发送回复..."));
+    dispatch(incrementBusy());
     try {
       await api(`/api/comments/${replyModal.comment.id}/reply`, {
         method: "POST",

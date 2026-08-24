@@ -54,8 +54,7 @@ export function SettingsTab() {
 
   // Save Download Settings
   const handleSaveDownloadSettings = async () => {
-    setDlMsg("保存中…");
-    dispatch(incrementBusy("正在保存下载设置..."));
+    dispatch(incrementBusy());
     try {
       const res = await api<any>("/api/settings", {
         method: "PUT",
@@ -66,11 +65,11 @@ export function SettingsTab() {
       });
       setDownloadDir(res.download_dir || "");
       setVideoQuality(res.video_quality || "highest");
-      setDlMsg("已保存 ✓ 新作品将按此设置下载");
-      dispatch(addToast({ type: "ok", message: "下载设置已保存" }));
+      setDlMsg("✓");
+      dispatch(addToast({ type: "ok", message: t("common.success") }));
     } catch (e: any) {
-      setDlMsg("失败: " + e.message);
-      dispatch(addToast({ type: "err", message: e.message || "保存失败" }));
+      setDlMsg(e.message || t("common.failed"));
+      dispatch(addToast({ type: "err", message: e.message || t("common.failed") }));
     } finally {
       dispatch(decrementBusy());
     }
@@ -78,8 +77,7 @@ export function SettingsTab() {
 
   // Test AI Connection
   const handleTestAi = async () => {
-    setAiMsg("测试中…");
-    dispatch(incrementBusy("正在测试大模型连通性..."));
+    dispatch(incrementBusy());
     try {
       const body: any = {
         base_url: aiBaseUrl.trim(),
@@ -98,15 +96,15 @@ export function SettingsTab() {
 
       setAiTestResult(res);
       if (res.ok) {
-        setAiMsg("连通正常 ✓");
-        dispatch(addToast({ type: "ok", message: "大模型连通正常 ✓" }));
+        setAiMsg("✓");
+        dispatch(addToast({ type: "ok", message: t("common.success") }));
       } else {
-        setAiMsg("连通失败: " + (res.error || ""));
-        dispatch(addToast({ type: "err", message: `连通失败: ${res.error || ""}` }));
+        setAiMsg(res.error || t("common.failed"));
+        dispatch(addToast({ type: "err", message: `${t("common.failed")}: ${res.error || ""}` }));
       }
     } catch (e: any) {
-      setAiMsg("失败: " + e.message);
-      dispatch(addToast({ type: "err", message: e.message || "测试失败" }));
+      setAiMsg(e.message || t("common.failed"));
+      dispatch(addToast({ type: "err", message: e.message || t("common.failed") }));
       setAiTestResult({ ok: false, error: e.message });
     } finally {
       dispatch(decrementBusy());
@@ -115,8 +113,7 @@ export function SettingsTab() {
 
   // Save AI Settings
   const handleSaveAiSettings = async () => {
-    setAiMsg("保存中…");
-    dispatch(incrementBusy("正在保存 AI 设置..."));
+    dispatch(incrementBusy());
     try {
       const body: any = {
         ai_enabled: aiEnabled,
@@ -126,7 +123,7 @@ export function SettingsTab() {
         ai_prompt: aiPrompt,
       };
       if (aiApiKey.trim()) {
-        body.ai_api_key = aiApiKey.trim();
+        body.api_key = aiApiKey.trim();
       }
 
       const res = await api<any>("/api/settings", {
@@ -136,16 +133,11 @@ export function SettingsTab() {
 
       setAiApiKey("");
       setAiApiKeySet(!!res.ai_api_key_set);
-      setAiMsg(`已保存 ✓ ${aiEnabled ? "(规则勾选「用 AI」即生效)" : "(当前未启用)"}`);
-      dispatch(
-        addToast({
-          type: "ok",
-          message: `AI 设置已保存 ✓ ${aiEnabled ? "(规则勾选「用 AI」即生效)" : "(当前未启用)"}`,
-        })
-      );
+      setAiMsg("✓");
+      dispatch(addToast({ type: "ok", message: t("common.success") }));
     } catch (e: any) {
-      setAiMsg("失败: " + e.message);
-      dispatch(addToast({ type: "err", message: e.message || "保存失败" }));
+      setAiMsg(e.message || t("common.failed"));
+      dispatch(addToast({ type: "err", message: e.message || t("common.failed") }));
     } finally {
       dispatch(decrementBusy());
     }

@@ -60,7 +60,7 @@ export function DanmakuTab() {
 
   const handleAddWatch = async () => {
     if (!danmakuUrl.trim()) return;
-    dispatch(incrementBusy("正在添加弹幕监控..."));
+    dispatch(incrementBusy());
     try {
       await api("/api/danmaku-watches", {
         method: "POST",
@@ -116,7 +116,7 @@ export function DanmakuTab() {
                 <div className="min-w-0 flex-1">
                   <div className="font-semibold text-xs text-[#f6f8fb] truncate">{w.title}</div>
                   <div className="text-[11px] text-[#778094] mt-0.5">
-                    {w.danmaku_count ?? 0} 条弹幕 · {timeAgo(w.last_sync_at)}
+                    {t("danmaku.countText", { count: w.danmaku_count ?? 0 })} · {timeAgo(w.last_sync_at)}
                   </div>
                 </div>
               </button>
@@ -168,7 +168,7 @@ export function DanmakuTab() {
             <Input
               value={danmakuUrl}
               onChange={(e) => setDanmakuUrl(e.target.value)}
-              placeholder="输入视频播放链接"
+              placeholder={t("danmaku.urlPlaceholder")}
               className="bg-[#0b0f16] border-[#2a3341] text-xs"
             />
             <div className="flex justify-end gap-2">

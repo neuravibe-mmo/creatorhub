@@ -131,11 +131,11 @@ export function AutoCommentTab() {
       .map((s) => s.trim())
       .filter(Boolean);
     if (tList.length === 0) {
-      dispatch(addToast({ type: "err", message: "请至少写一条文案模板(AI 失败时回退用)" }));
+      dispatch(addToast({ type: "err", message: t("autocomment.templatePlaceholder") }));
       return;
     }
 
-    dispatch(incrementBusy("正在创建评论规则..."));
+    dispatch(incrementBusy());
     try {
       await api("/api/comment-rules", {
         method: "POST",
@@ -158,12 +158,12 @@ export function AutoCommentTab() {
         }),
       });
 
-      dispatch(addToast({ type: "ok", message: "规则已创建(默认关闭)，可在下方「试跑」预览" }));
+      dispatch(addToast({ type: "ok", message: t("common.success") }));
       setTarget("");
       setTemplates("");
       loadRules();
     } catch (e: any) {
-      dispatch(addToast({ type: "err", message: e.message || "创建规则失败" }));
+      dispatch(addToast({ type: "err", message: e.message || t("common.failed") }));
     } finally {
       dispatch(decrementBusy());
     }
@@ -176,16 +176,16 @@ export function AutoCommentTab() {
         method: "PUT",
         body: JSON.stringify({ enabled }),
       });
-      dispatch(addToast({ type: "ok", message: enabled ? "已启用" : "已停用" }));
+      dispatch(addToast({ type: "ok", message: t("common.success") }));
       loadRules();
     } catch (e: any) {
-      dispatch(addToast({ type: "err", message: e.message || "操作失败" }));
+      dispatch(addToast({ type: "err", message: e.message || t("common.failed") }));
     }
   };
 
   // Run Rule Now (Test Run)
   const handleRunRule = async (id: number) => {
-    dispatch(incrementBusy("正在试跑抓取目标并生成文案..."));
+    dispatch(incrementBusy());
     try {
       const res = await api<{
         ok: boolean;
@@ -198,28 +198,14 @@ export function AutoCommentTab() {
       }>(`/api/comment-rules/${id}/run-now`, { method: "POST" });
 
       if (!res.ok) {
-        dispatch(addToast({ type: "err", message: `未生成: ${res.error || ""}` }));
-      } else if ((res.created ?? 0) > 0) {
-        dispatch(
-          addToast({
-            type: "ok",
-            message: `生成 ${res.created} 条${
-              res.manual_only ? "人工草稿" : res.review ? "草稿(待人工审核)" : "任务"
-            } (发现 ${res.candidates} 个目标)`,
-          })
-        );
+        dispatch(addToast({ type: "err", message: `${t("common.failed")}: ${res.error || ""}` }));
       } else {
-        dispatch(
-          addToast({
-            type: "info",
-            message: `发现 ${res.candidates} 个目标，生成 0 条${res.note ? `: ${res.note}` : ""}`,
-          })
-        );
+        dispatch(addToast({ type: "ok", message: t("common.success") }));
       }
       loadRules();
       loadTasks();
     } catch (e: any) {
-      dispatch(addToast({ type: "err", message: e.message || "试跑失败" }));
+      dispatch(addToast({ type: "err", message: e.message || t("common.failed") }));
     } finally {
       dispatch(decrementBusy());
     }
@@ -227,14 +213,14 @@ export function AutoCommentTab() {
 
   // Delete Rule
   const handleDeleteRule = async (id: number) => {
-    if (!confirm("确定删除该规则及其未发送任务？")) return;
+    if (!confirm(t("common.confirm") + "?")) return;
     try {
       await api(`/api/comment-rules/${id}`, { method: "DELETE" });
-      dispatch(addToast({ type: "ok", message: "规则已删除" }));
+      dispatch(addToast({ type: "ok", message: t("common.success") }));
       loadRules();
       loadTasks();
     } catch (e: any) {
-      dispatch(addToast({ type: "err", message: e.message || "删除失败" }));
+      dispatch(addToast({ type: "err", message: e.message || t("common.failed") }));
     }
   };
 
@@ -255,11 +241,11 @@ export function AutoCommentTab() {
       .map((s: string) => s.trim())
       .filter(Boolean);
     if (tList.length === 0) {
-      dispatch(addToast({ type: "err", message: "请至少写一条文案模板" }));
+      dispatch(addToast({ type: "err", message: t("autocomment.templatePlaceholder") }));
       return;
     }
 
-    dispatch(incrementBusy("正在更新规则..."));
+    dispatch(incrementBusy());
     try {
       await api(`/api/comment-rules/${editingRule.id}`, {
         method: "PUT",
@@ -281,10 +267,10 @@ export function AutoCommentTab() {
         }),
       });
       setEditModalOpen(false);
-      dispatch(addToast({ type: "ok", message: "规则已更新 ✓" }));
+      dispatch(addToast({ type: "ok", message: t("common.success") }));
       loadRules();
     } catch (e: any) {
-      dispatch(addToast({ type: "err", message: e.message || "更新失败" }));
+      dispatch(addToast({ type: "err", message: e.message || t("common.failed") }));
     } finally {
       dispatch(decrementBusy());
     }
@@ -294,47 +280,47 @@ export function AutoCommentTab() {
   const handleApproveTask = async (id: number) => {
     try {
       await api(`/api/comment-tasks/${id}/approve`, { method: "POST" });
-      dispatch(addToast({ type: "ok", message: "已通过，转入待发队列" }));
+      dispatch(addToast({ type: "ok", message: t("common.success") }));
       loadTasks();
     } catch (e: any) {
-      dispatch(addToast({ type: "err", message: e.message || "操作失败" }));
+      dispatch(addToast({ type: "err", message: e.message || t("common.failed") }));
     }
   };
 
   const handleApproveAllDrafts = async () => {
     const draftIds = tasks.filter((t) => t.status === "draft").map((t) => t.id);
     if (draftIds.length === 0) return;
-    if (!confirm(`通过 ${draftIds.length} 条草稿？通过后引擎按节流陆续发出。`)) return;
+    if (!confirm(t("common.confirm") + "?")) return;
 
-    dispatch(incrementBusy("正在批量批准草稿..."));
+    dispatch(incrementBusy());
     try {
-      const res = await api<{ approved: number }>("/api/comment-tasks/batch-approve", {
+      await api<{ approved: number }>("/api/comment-tasks/batch-approve", {
         method: "POST",
         body: JSON.stringify({ ids: draftIds }),
       });
-      dispatch(addToast({ type: "ok", message: `已通过 ${res.approved} 条草稿` }));
+      dispatch(addToast({ type: "ok", message: t("common.success") }));
       loadTasks();
     } catch (e: any) {
-      dispatch(addToast({ type: "err", message: e.message || "操作失败" }));
+      dispatch(addToast({ type: "err", message: e.message || t("common.failed") }));
     } finally {
       dispatch(decrementBusy());
     }
   };
 
   const handleRunTask = async (id: number) => {
-    dispatch(incrementBusy("正在启动浏览器发送评论..."));
+    dispatch(incrementBusy());
     try {
       const res = await api<{ ok: boolean; error?: string }>(`/api/comment-tasks/${id}/run-now`, {
         method: "POST",
       });
       if (res.ok) {
-        dispatch(addToast({ type: "ok", message: "已发送 ✓" }));
+        dispatch(addToast({ type: "ok", message: t("common.success") }));
       } else {
-        dispatch(addToast({ type: "err", message: `未成功: ${res.error || ""}` }));
+        dispatch(addToast({ type: "err", message: `${t("common.failed")}: ${res.error || ""}` }));
       }
       loadTasks();
     } catch (e: any) {
-      dispatch(addToast({ type: "err", message: e.message || "发送失败" }));
+      dispatch(addToast({ type: "err", message: e.message || t("common.failed") }));
     } finally {
       dispatch(decrementBusy());
     }
@@ -343,20 +329,20 @@ export function AutoCommentTab() {
   const handleCancelTask = async (id: number) => {
     try {
       await api(`/api/comment-tasks/${id}/cancel`, { method: "POST" });
-      dispatch(addToast({ type: "ok", message: "已取消任务" }));
+      dispatch(addToast({ type: "ok", message: t("common.success") }));
       loadTasks();
     } catch (e: any) {
-      dispatch(addToast({ type: "err", message: e.message || "操作失败" }));
+      dispatch(addToast({ type: "err", message: e.message || t("common.failed") }));
     }
   };
 
   const handleDeleteTask = async (id: number) => {
     try {
       await api(`/api/comment-tasks/${id}`, { method: "DELETE" });
-      dispatch(addToast({ type: "ok", message: "已删除" }));
+      dispatch(addToast({ type: "ok", message: t("common.success") }));
       loadTasks();
     } catch (e: any) {
-      dispatch(addToast({ type: "err", message: e.message || "删除失败" }));
+      dispatch(addToast({ type: "err", message: e.message || t("common.failed") }));
     }
   };
 

@@ -42,7 +42,7 @@ export function ProxiesTab() {
 
   const handleAddProxy = async () => {
     if (!proxyUrl.trim()) return;
-    dispatch(incrementBusy("正在添加代理..."));
+    dispatch(incrementBusy());
     try {
       await api("/api/proxies", {
         method: "POST",
@@ -68,7 +68,7 @@ export function ProxiesTab() {
       });
       dispatch(setTestStatus({ url, status: res.ok ? "ok" : "failed" }));
       if (res.ok) {
-        dispatch(addToast({ type: "ok", message: `连通正常 (${res.latency_ms || 0}ms)` }));
+        dispatch(addToast({ type: "ok", message: `${t("proxies.statuses.ok")} (${res.latency_ms || 0}ms)` }));
       } else {
         dispatch(addToast({ type: "err", message: t("common.failed") }));
       }
@@ -87,7 +87,7 @@ export function ProxiesTab() {
   };
 
   const handleAssignAll = async () => {
-    dispatch(incrementBusy("正在批量分配代理..."));
+    dispatch(incrementBusy());
     try {
       await api("/api/proxies/assign-all", { method: "POST" });
       dispatch(addToast({ type: "ok", message: t("common.success") }));
@@ -114,7 +114,7 @@ export function ProxiesTab() {
           </Button>
           <Button variant="secondary" onClick={handleAssignAll} className="gap-2 border-[#2a3341] bg-[#181d27] text-[#e7eaf0]">
             <ArrowRightLeft className="w-4 h-4" />
-            <span>自动均衡分配</span>
+            <span>{t("proxies.autoBalance")}</span>
           </Button>
         </div>
       </div>
@@ -147,7 +147,7 @@ export function ProxiesTab() {
                       {prx.url}
                     </div>
                     <div className="text-[11px] text-[#778094]">
-                      绑定的账号数: {prx.assigned_count ?? 0}
+                      {t("proxies.boundAccounts", { count: prx.assigned_count ?? 0 })}
                     </div>
                   </div>
 
@@ -161,12 +161,12 @@ export function ProxiesTab() {
                     }
                   >
                     {testStatus === "testing"
-                      ? "测试中..."
+                      ? t("proxies.statuses.testing")
                       : testStatus === "ok"
-                      ? "畅通"
+                      ? t("proxies.statuses.ok")
                       : testStatus === "failed"
-                      ? "超时"
-                      : "未测"}
+                      ? t("proxies.statuses.failed")
+                      : t("proxies.statuses.untested")}
                   </Badge>
                 </div>
 
@@ -205,7 +205,7 @@ export function ProxiesTab() {
             <Input
               value={proxyUrl}
               onChange={(e) => setProxyUrl(e.target.value)}
-              placeholder="http://user:pass@host:port 或 socks5://host:port"
+              placeholder={t("proxies.urlPlaceholder")}
               className="bg-[#0b0f16] border-[#2a3341] text-xs font-mono"
             />
             <div className="flex justify-end gap-2">

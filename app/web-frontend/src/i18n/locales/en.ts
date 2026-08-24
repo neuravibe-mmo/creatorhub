@@ -254,6 +254,8 @@ export const en: TranslationSchema = {
     videoTitle: "Video Title",
     danmakuCount: "Danmaku Count",
     timeline: "Timeline Distribution",
+    countText: "{count} danmaku",
+    urlPlaceholder: "Enter video stream URL",
   },
   publish: {
     title: "Publish Posts / Works",
@@ -268,6 +270,8 @@ export const en: TranslationSchema = {
     titlePlaceholder: "Enter work title",
     contentPlaceholder: "Enter content body or copy description...",
     tagsPlaceholder: "e.g., travel, food, daily (separated by spaces or commas)",
+    fillRequired: "Please enter title and select publish account",
+    noDesc: "No description",
   },
   autocomment: {
     title: "Auto Comment",
@@ -420,6 +424,15 @@ export const en: TranslationSchema = {
     auth: "Username/Password (optional)",
     latency: "Latency (Ping)",
     testLatency: "Test Speed",
+    autoBalance: "Auto Balance",
+    boundAccounts: "Bound Accounts: {count}",
+    urlPlaceholder: "http://user:pass@host:port or socks5://host:port",
+    statuses: {
+      testing: "Testing...",
+      ok: "Online",
+      failed: "Timeout",
+      untested: "Untested",
+    },
   },
   risk: {
     normalAccounts: "Normal Accounts",

@@ -253,7 +253,9 @@ export const vi: TranslationSchema = {
     title: "Danmaku video ngắn",
     videoTitle: "Tiêu đề video",
     danmakuCount: "Số lượng danmaku",
-    timeline: "Phân bố trục thời gian",
+    timeline: "Phân bố dòng thời gian",
+    countText: "{count} danmaku",
+    urlPlaceholder: "Nhập link phát video",
   },
   publish: {
     title: "Đăng bài / Xuất bản tác phẩm",
@@ -268,6 +270,8 @@ export const vi: TranslationSchema = {
     titlePlaceholder: "Nhập tiêu đề tác phẩm",
     contentPlaceholder: "Nhập nội dung bài viết hoặc mô tả...",
     tagsPlaceholder: "Ví dụ: Review, ẩm thực, đời sống (phân cách bằng dấu cách hoặc phẩy)",
+    fillRequired: "Vui lòng nhập tiêu đề và chọn tài khoản đăng",
+    noDesc: "Không có mô tả",
   },
   autocomment: {
     title: "Bình luận tự động",
@@ -420,6 +424,15 @@ export const vi: TranslationSchema = {
     auth: "Tài khoản/Mật khẩu (tùy chọn)",
     latency: "Độ trễ",
     testLatency: "Đo tốc độ",
+    autoBalance: "Tự động phân bổ cân bằng",
+    boundAccounts: "Số tài khoản đã gán: {count}",
+    urlPlaceholder: "http://user:pass@host:port hoặc socks5://host:port",
+    statuses: {
+      testing: "Đang kiểm tra...",
+      ok: "Thông suốt",
+      failed: "Quá thời gian",
+      untested: "Chưa đo",
+    },
   },
   risk: {
     normalAccounts: "Tài khoản bình thường",

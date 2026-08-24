@@ -50,11 +50,11 @@ export function PublishTab() {
 
   const handleSubmitPublish = async () => {
     if (!title.trim() || !accountId) {
-      dispatch(addToast({ type: "err", message: "请填写标题并选择发布账号" }));
+      dispatch(addToast({ type: "err", message: t("publish.fillRequired") }));
       return;
     }
 
-    dispatch(incrementBusy("正在提交发布任务..."));
+    dispatch(incrementBusy());
     try {
       const tagList = tags
         .split(/[,\s#]+/)
@@ -178,7 +178,7 @@ export function PublishTab() {
                       {tsk.status}
                     </Badge>
                   </div>
-                  <div className="text-[11px] text-[#778094] truncate">{tsk.desc || "无描述"}</div>
+                  <div className="text-[11px] text-[#778094] truncate">{tsk.desc || t("publish.noDesc")}</div>
                   <div className="text-[10px] text-[#778094]">{timeAgo(tsk.created_at)}</div>
                 </div>
               ))

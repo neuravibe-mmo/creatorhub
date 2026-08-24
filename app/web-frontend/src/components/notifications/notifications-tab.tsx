@@ -59,11 +59,11 @@ export function NotificationsTab() {
     try {
       parsedConfig = JSON.parse(configText || "{}");
     } catch {
-      dispatch(addToast({ type: "err", message: "配置不是合法 JSON" }));
+      dispatch(addToast({ type: "err", message: t("common.failed") }));
       return;
     }
 
-    dispatch(incrementBusy("正在添加通知渠道..."));
+    dispatch(incrementBusy());
     try {
       await api("/api/notifications", {
         method: "POST",
@@ -74,10 +74,10 @@ export function NotificationsTab() {
         }),
       });
       setName("");
-      dispatch(addToast({ type: "ok", message: "通知渠道已添加 ✓" }));
+      dispatch(addToast({ type: "ok", message: t("common.success") }));
       loadChannels();
     } catch (e: any) {
-      dispatch(addToast({ type: "err", message: e.message || "添加失败" }));
+      dispatch(addToast({ type: "err", message: e.message || t("common.failed") }));
     } finally {
       dispatch(decrementBusy());
     }
@@ -90,27 +90,27 @@ export function NotificationsTab() {
         method: "PUT",
         body: JSON.stringify({ enabled }),
       });
-      dispatch(addToast({ type: "ok", message: enabled ? "已启用" : "已停用" }));
+      dispatch(addToast({ type: "ok", message: t("common.success") }));
       loadChannels();
     } catch (e: any) {
-      dispatch(addToast({ type: "err", message: e.message || "操作失败" }));
+      dispatch(addToast({ type: "err", message: e.message || t("common.failed") }));
     }
   };
 
   // Test Channel
   const handleTestChannel = async (id: number) => {
-    dispatch(incrementBusy("正在发送测试推送..."));
+    dispatch(incrementBusy());
     try {
       const res = await api<{ ok: boolean; detail?: string }>(`/api/notifications/${id}/test`, {
         method: "POST",
       });
       if (res.ok) {
-        dispatch(addToast({ type: "ok", message: "测试推送已发送 ✓" }));
+        dispatch(addToast({ type: "ok", message: t("common.success") }));
       } else {
-        dispatch(addToast({ type: "err", message: `发送失败: ${res.detail || ""}` }));
+        dispatch(addToast({ type: "err", message: `${t("common.failed")}: ${res.detail || ""}` }));
       }
     } catch (e: any) {
-      dispatch(addToast({ type: "err", message: e.message || "测试失败" }));
+      dispatch(addToast({ type: "err", message: e.message || t("common.failed") }));
     } finally {
       dispatch(decrementBusy());
     }
@@ -118,13 +118,13 @@ export function NotificationsTab() {
 
   // Delete Channel
   const handleDeleteChannel = async (id: number) => {
-    if (!confirm("确定删除该通知渠道？")) return;
+    if (!confirm(t("common.confirm") + "?")) return;
     try {
       await api(`/api/notifications/${id}`, { method: "DELETE" });
-      dispatch(addToast({ type: "ok", message: "渠道已删除" }));
+      dispatch(addToast({ type: "ok", message: t("common.success") }));
       loadChannels();
     } catch (e: any) {
-      dispatch(addToast({ type: "err", message: e.message || "删除失败" }));
+      dispatch(addToast({ type: "err", message: e.message || t("common.failed") }));
     }
   };
 
@@ -143,11 +143,11 @@ export function NotificationsTab() {
     try {
       parsedConfig = JSON.parse(editConfigText || "{}");
     } catch {
-      dispatch(addToast({ type: "err", message: "配置不是合法 JSON，请修正后再保存" }));
+      dispatch(addToast({ type: "err", message: t("common.failed") }));
       return;
     }
 
-    dispatch(incrementBusy("正在更新通知渠道..."));
+    dispatch(incrementBusy());
     try {
       await api(`/api/notifications/${editingChannel.id}`, {
         method: "PUT",
@@ -157,10 +157,10 @@ export function NotificationsTab() {
         }),
       });
       setEditOpen(false);
-      dispatch(addToast({ type: "ok", message: "通知渠道已更新 ✓" }));
+      dispatch(addToast({ type: "ok", message: t("common.success") }));
       loadChannels();
     } catch (e: any) {
-      dispatch(addToast({ type: "err", message: e.message || "更新失败" }));
+      dispatch(addToast({ type: "err", message: e.message || t("common.failed") }));
     } finally {
       dispatch(decrementBusy());
     }

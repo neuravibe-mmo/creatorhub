@@ -96,10 +96,10 @@ export function ShareDownloadTab() {
   // Parse links
   const handleParseLinks = async () => {
     if (!shareText.trim()) {
-      dispatch(addToast({ type: "err", message: "请粘贴分享链接或完整分享文案" }));
+      dispatch(addToast({ type: "err", message: t("shareDownload.placeholder") }));
       return;
     }
-    dispatch(incrementBusy("正在清洗文案并识别链接..."));
+    dispatch(incrementBusy());
     try {
       const res = await api<{ links: any[]; count: number }>("/api/share-download/links", {
         method: "POST",
@@ -108,12 +108,12 @@ export function ShareDownloadTab() {
       setParsedLinks(res.links || []);
       setSelectedLinkIndex(0);
       if (res.count > 0) {
-        dispatch(addToast({ type: "ok", message: `已识别 ${res.count} 条链接 ✓` }));
+        dispatch(addToast({ type: "ok", message: t("common.success") }));
       } else {
-        dispatch(addToast({ type: "err", message: "未识别到链接" }));
+        dispatch(addToast({ type: "err", message: t("common.failed") }));
       }
     } catch (e: any) {
-      dispatch(addToast({ type: "err", message: e.message || "识别失败" }));
+      dispatch(addToast({ type: "err", message: e.message || t("common.failed") }));
     } finally {
       dispatch(decrementBusy());
     }
@@ -138,19 +138,19 @@ export function ShareDownloadTab() {
   // Inspect link only
   const handleInspect = async () => {
     if (!shareText.trim()) {
-      dispatch(addToast({ type: "err", message: "请粘贴分享链接" }));
+      dispatch(addToast({ type: "err", message: t("shareDownload.placeholder") }));
       return;
     }
-    dispatch(incrementBusy("正在读取作品元数据信息..."));
+    dispatch(incrementBusy());
     try {
       const res = await api<any>("/api/share-download", {
         method: "POST",
         body: JSON.stringify(buildRequestBody(false)),
       });
       setInspectResult(res);
-      dispatch(addToast({ type: "ok", message: "已读取作品信息" }));
+      dispatch(addToast({ type: "ok", message: t("common.success") }));
     } catch (e: any) {
-      dispatch(addToast({ type: "err", message: e.message || "读取信息失败" }));
+      dispatch(addToast({ type: "err", message: e.message || t("common.failed") }));
     } finally {
       dispatch(decrementBusy());
     }
@@ -159,20 +159,20 @@ export function ShareDownloadTab() {
   // Start Download
   const handleStartDownload = async () => {
     if (!shareText.trim()) {
-      dispatch(addToast({ type: "err", message: "请粘贴分享链接" }));
+      dispatch(addToast({ type: "err", message: t("shareDownload.placeholder") }));
       return;
     }
-    dispatch(incrementBusy("正在下载作品媒体文件..."));
+    dispatch(incrementBusy());
     try {
       const res = await api<any>("/api/share-download", {
         method: "POST",
         body: JSON.stringify(buildRequestBody(true)),
       });
       setInspectResult(res);
-      dispatch(addToast({ type: "ok", message: "下载成功 ✓" }));
+      dispatch(addToast({ type: "ok", message: t("common.success") }));
       loadHistory();
     } catch (e: any) {
-      dispatch(addToast({ type: "err", message: e.message || "下载失败" }));
+      dispatch(addToast({ type: "err", message: e.message || t("common.failed") }));
     } finally {
       dispatch(decrementBusy());
     }
@@ -182,29 +182,29 @@ export function ShareDownloadTab() {
   const handleDeleteHistory = async (id: number) => {
     try {
       await api(`/api/share-download/history/${id}`, { method: "DELETE" });
-      dispatch(addToast({ type: "ok", message: "已删除记录" }));
+      dispatch(addToast({ type: "ok", message: t("common.success") }));
       loadHistory();
       setSelectedHistoryIds((prev) => prev.filter((i) => i !== id));
     } catch (e: any) {
-      dispatch(addToast({ type: "err", message: e.message || "删除失败" }));
+      dispatch(addToast({ type: "err", message: e.message || t("common.failed") }));
     }
   };
 
   // Batch Delete
   const handleBatchDelete = async () => {
     if (selectedHistoryIds.length === 0) return;
-    if (!confirm(`确定批量删除选中的 ${selectedHistoryIds.length} 条记录？`)) return;
-    dispatch(incrementBusy("正在批量删除..."));
+    if (!confirm(t("common.confirm") + "?")) return;
+    dispatch(incrementBusy());
     try {
       await api("/api/share-download/history/batch-delete", {
         method: "POST",
         body: JSON.stringify({ ids: selectedHistoryIds }),
       });
-      dispatch(addToast({ type: "ok", message: `已删除 ${selectedHistoryIds.length} 条记录` }));
+      dispatch(addToast({ type: "ok", message: t("common.success") }));
       setSelectedHistoryIds([]);
       loadHistory();
     } catch (e: any) {
-      dispatch(addToast({ type: "err", message: e.message || "删除失败" }));
+      dispatch(addToast({ type: "err", message: e.message || t("common.failed") }));
     } finally {
       dispatch(decrementBusy());
     }
@@ -216,9 +216,9 @@ export function ShareDownloadTab() {
       await api(`/api/share-download/history/${id}/reveal`, {
         method: "POST",
       });
-      dispatch(addToast({ type: "ok", message: "已在文件夹中定位文件" }));
+      dispatch(addToast({ type: "ok", message: t("common.success") }));
     } catch (e: any) {
-      dispatch(addToast({ type: "err", message: e.message || "打开文件夹失败" }));
+      dispatch(addToast({ type: "err", message: e.message || t("common.failed") }));
     }
   };
 
@@ -256,11 +256,11 @@ export function ShareDownloadTab() {
 
   // Export report
   const handleExportHistory = async (full: boolean) => {
-    dispatch(incrementBusy("正在导出 Excel..."));
+    dispatch(incrementBusy());
     try {
       const qs = full ? "?full=true" : `?q=${encodeURIComponent(historySearch)}&platform=${historyPlatform}`;
       const response = await fetch(`/api/reports/share-download-history.xlsx${qs}`);
-      if (!response.ok) throw new Error("导出失败");
+      if (!response.ok) throw new Error(t("common.failed"));
       const blob = await response.blob();
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
@@ -270,9 +270,9 @@ export function ShareDownloadTab() {
       link.click();
       link.remove();
       URL.revokeObjectURL(url);
-      dispatch(addToast({ type: "ok", message: "Excel 下载历史已导出" }));
+      dispatch(addToast({ type: "ok", message: t("common.success") }));
     } catch (e: any) {
-      dispatch(addToast({ type: "err", message: e.message || "导出失败" }));
+      dispatch(addToast({ type: "err", message: e.message || t("common.failed") }));
     } finally {
       dispatch(decrementBusy());
     }

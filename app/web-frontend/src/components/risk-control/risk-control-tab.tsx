@@ -173,7 +173,7 @@ export function RiskControlTab() {
 
   // Save Risk Config
   const handleSaveConfig = async () => {
-    dispatch(incrementBusy("正在保存风控规则并立即生效..."));
+    dispatch(incrementBusy());
     try {
       const steps = cooldownSteps
         .split(/[,，\s]+/)
@@ -225,10 +225,10 @@ export function RiskControlTab() {
       });
 
       dispatch(setRiskConfig(res));
-      dispatch(addToast({ type: "ok", message: "风控规则已保存并立即生效 ✓" }));
+      dispatch(addToast({ type: "ok", message: t("common.success") }));
       loadRiskData();
     } catch (e: any) {
-      dispatch(addToast({ type: "err", message: e.message || "保存失败" }));
+      dispatch(addToast({ type: "err", message: e.message || t("common.failed") }));
     } finally {
       dispatch(decrementBusy());
     }
@@ -236,25 +236,25 @@ export function RiskControlTab() {
 
   // Probe Account
   const handleProbeAccount = async (id: number) => {
-    dispatch(incrementBusy("正在执行轻量探测..."));
+    dispatch(incrementBusy());
     try {
       const res = await api<{ result?: { skipped?: boolean; reason?: string }; woken_tasks?: number }>(
         `/api/risk-control/accounts/${id}/probe`,
         { method: "POST" }
       );
       if (res.result?.skipped) {
-        dispatch(addToast({ type: "info", message: `当前尚未放行探测: ${res.result.reason || "处于冷却期"}` }));
+        dispatch(addToast({ type: "info", message: res.result.reason || t("common.failed") }));
       } else {
         dispatch(
           addToast({
             type: "ok",
-            message: `探测成功，恢复进度已更新${res.woken_tasks ? `，唤醒 ${res.woken_tasks} 条任务` : ""}`,
+            message: t("common.success"),
           })
         );
       }
       loadRiskData();
     } catch (e: any) {
-      dispatch(addToast({ type: "err", message: e.message || "探测失败" }));
+      dispatch(addToast({ type: "err", message: e.message || t("common.failed") }));
     } finally {
       dispatch(decrementBusy());
     }
@@ -282,13 +282,13 @@ export function RiskControlTab() {
   // Confirm Clear
   const handleConfirmClear = async () => {
     if (!clearingAccountId || clearReason.trim().length < 3) {
-      dispatch(addToast({ type: "err", message: "请填写至少 3 个字符的解除原因" }));
+      dispatch(addToast({ type: "err", message: t("risk.clearReasonPlaceholder") }));
       return;
     }
 
-    dispatch(incrementBusy("正在解除账号风控状态..."));
+    dispatch(incrementBusy());
     try {
-      const res = await api<{ woken_tasks?: number }>(`/api/risk-control/accounts/${clearingAccountId}/clear`, {
+      await api<{ woken_tasks?: number }>(`/api/risk-control/accounts/${clearingAccountId}/clear`, {
         method: "POST",
         body: JSON.stringify({ confirmed: true, reason: clearReason.trim() }),
       });
@@ -296,12 +296,12 @@ export function RiskControlTab() {
       dispatch(
         addToast({
           type: "ok",
-          message: `账号风控状态已解除${res.woken_tasks ? `，已唤醒 ${res.woken_tasks} 条任务` : ""}`,
+          message: t("common.success"),
         })
       );
       loadRiskData();
     } catch (e: any) {
-      dispatch(addToast({ type: "err", message: e.message || "解除失败" }));
+      dispatch(addToast({ type: "err", message: e.message || t("common.failed") }));
     } finally {
       dispatch(decrementBusy());
     }

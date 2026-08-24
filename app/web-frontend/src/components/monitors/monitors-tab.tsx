@@ -54,7 +54,7 @@ export function MonitorsTab() {
 
   const handleAddMonitor = async () => {
     if (!targetUrl.trim()) return;
-    dispatch(incrementBusy("正在添加监控目标..."));
+    dispatch(incrementBusy());
     try {
       await api("/api/monitors", {
         method: "POST",
@@ -73,7 +73,7 @@ export function MonitorsTab() {
 
   const handleCreateCollection = async () => {
     if (!keywordText.trim()) return;
-    dispatch(incrementBusy("正在发起批量采集任务..."));
+    dispatch(incrementBusy());
     try {
       await api("/api/collections", {
         method: "POST",
@@ -102,7 +102,7 @@ export function MonitorsTab() {
   };
 
   const handleSyncMonitor = async (id: number) => {
-    dispatch(incrementBusy("正在抓取最新作品..."));
+    dispatch(incrementBusy());
     try {
       await api(`/api/monitors/${id}/sync`, { method: "POST" });
       dispatch(addToast({ type: "ok", message: t("common.success") }));

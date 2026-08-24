@@ -98,7 +98,7 @@ export function HubTab() {
   // Sync My Works via Patchright
   const handleSyncMyWorks = async () => {
     if (!selectedAccountId) return;
-    dispatch(incrementBusy("正在打开浏览器抓取作品..."));
+    dispatch(incrementBusy());
     try {
       await api(`/api/hub/${selectedAccountId}/sync/works`, { method: "POST" });
       dispatch(addToast({ type: "ok", message: t("common.success") }));
@@ -113,7 +113,7 @@ export function HubTab() {
   // Sync DMs
   const handleSyncDMs = async () => {
     if (!selectedAccountId) return;
-    dispatch(incrementBusy("正在拉取最新私信..."));
+    dispatch(incrementBusy());
     try {
       await api(`/api/hub/${selectedAccountId}/sync/dm`, { method: "POST" });
       dispatch(addToast({ type: "ok", message: t("common.success") }));
@@ -128,10 +128,10 @@ export function HubTab() {
   // Open Browser for manual interaction
   const handleOpenAccountBrowser = async () => {
     if (!selectedAccountId) return;
-    dispatch(incrementBusy("正在启动独立浏览器窗口..."));
+    dispatch(incrementBusy());
     try {
       await api(`/api/hub/${selectedAccountId}/browser/open`, { method: "POST" });
-      dispatch(addToast({ type: "ok", message: "浏览器已启动" }));
+      dispatch(addToast({ type: "ok", message: t("common.success") }));
     } catch (e: any) {
       dispatch(addToast({ type: "err", message: e.message || t("common.failed") }));
     } finally {

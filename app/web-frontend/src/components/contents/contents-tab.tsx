@@ -49,7 +49,7 @@ export function ContentsTab() {
   }, [currentPlatform, page, filterMediaType, searchQuery]);
 
   const handleDownloadSingle = async (item: ContentItem) => {
-    dispatch(incrementBusy("正在下载媒体文件..."));
+    dispatch(incrementBusy());
     try {
       await api(`/api/contents/${item.id}/download`, { method: "POST" });
       dispatch(addToast({ type: "ok", message: t("common.success") }));
@@ -63,7 +63,7 @@ export function ContentsTab() {
 
   const handleBatchDownload = async () => {
     if (selectedIds.length === 0) return;
-    dispatch(incrementBusy(`正在批量下载 ${selectedIds.length} 个作品...`));
+    dispatch(incrementBusy());
     try {
       await api("/api/contents/batch-download", {
         method: "POST",

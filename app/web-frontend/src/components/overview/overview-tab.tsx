@@ -50,10 +50,10 @@ export function OverviewTab() {
   }, [currentPlatform]);
 
   const handleExportReport = async () => {
-    dispatch(incrementBusy("正在导出 Excel 报告..."));
+    dispatch(incrementBusy());
     try {
       const response = await fetch(`/api/reports/monitor.xlsx?platform=${currentPlatform}`);
-      if (!response.ok) throw new Error("导出失败");
+      if (!response.ok) throw new Error(t("common.failed"));
       const blob = await response.blob();
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
@@ -63,9 +63,9 @@ export function OverviewTab() {
       link.click();
       link.remove();
       URL.revokeObjectURL(url);
-      dispatch(addToast({ type: "ok", message: "Excel 监控报告已导出" }));
+      dispatch(addToast({ type: "ok", message: t("common.success") }));
     } catch (e: any) {
-      dispatch(addToast({ type: "err", message: e.message || "导出失败" }));
+      dispatch(addToast({ type: "err", message: e.message || t("common.failed") }));
     } finally {
       dispatch(decrementBusy());
     }
