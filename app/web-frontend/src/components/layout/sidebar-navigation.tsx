@@ -5,6 +5,7 @@ import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { setTab } from "@/store/slices/platformSlice";
 import { NAV_GROUPS } from "@/lib/constants";
 import { cn } from "@/lib/utils";
+import { useTranslation, TxKey } from "@/i18n";
 import {
   Zap,
   CreditCard,
@@ -37,11 +38,36 @@ const ICON_MAP: Record<string, React.ElementType> = {
   Shield,
 };
 
+const TAB_TX_MAP: Record<string, TxKey> = {
+  overview: "nav.overview",
+  accounts: "nav.accounts",
+  hub: "nav.hub",
+  monitors: "nav.monitors",
+  collections: "nav.collections",
+  contents: "nav.contents",
+  comments: "nav.comments",
+  danmaku: "nav.danmaku",
+  publish: "nav.publish",
+  autocomment: "nav.autocomment",
+  "share-download": "nav.share_download",
+  proxies: "nav.proxies",
+  "risk-control": "nav.risk_control",
+  notifications: "nav.notifications",
+  settings: "nav.settings",
+};
+
+const GROUP_TX_MAP: Record<string, TxKey> = {
+  本账号: "nav.groups.account",
+  工具: "nav.groups.tools",
+  安全: "nav.groups.security",
+};
+
 export function SidebarNavigation() {
   const dispatch = useAppDispatch();
   const currentTab = useAppSelector((state) => state.platform.currentTab);
   const currentPlatform = useAppSelector((state) => state.platform.currentPlatform);
   const badges = useAppSelector((state) => state.platform.badges);
+  const { t } = useTranslation();
 
   return (
     <aside className="w-[232px] shrink-0 border-r border-[#1d2530] bg-[#090b10] p-3 flex flex-col gap-1 min-h-[calc(100vh-68px)] select-none">
@@ -53,11 +79,13 @@ export function SidebarNavigation() {
 
         if (visibleItems.length === 0) return null;
 
+        const groupLabel = group.label ? (GROUP_TX_MAP[group.label] ? t(GROUP_TX_MAP[group.label]) : group.label) : null;
+
         return (
           <div key={gIdx} className="space-y-1">
-            {group.label && (
+            {groupLabel && (
               <div className="text-[11px] font-semibold text-[#778094] px-3 pt-3 pb-1 uppercase tracking-wider">
-                {group.label}
+                {groupLabel}
               </div>
             )}
 
@@ -65,6 +93,7 @@ export function SidebarNavigation() {
               const IconComponent = ICON_MAP[item.icon] || Zap;
               const isActive = currentTab === item.tab;
               const badgeCount = item.badgeKey ? badges[item.badgeKey] || 0 : 0;
+              const label = TAB_TX_MAP[item.tab] ? t(TAB_TX_MAP[item.tab]) : item.label;
 
               return (
                 <button
@@ -84,7 +113,7 @@ export function SidebarNavigation() {
                         isActive ? "text-[#fe2c55]" : "text-[#778094] group-hover:text-[#e7eaf0]"
                       )}
                     />
-                    <span className="truncate">{item.label}</span>
+                    <span className="truncate">{label}</span>
                   </div>
                   {badgeCount > 0 && (
                     <span

@@ -21,13 +21,15 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { MessageSquare, Plus, Heart, Reply, Trash2 } from "lucide-react";
 import { timeAgo } from "@/lib/utils";
+import { useTranslation } from "@/i18n";
 
 export function CommentsTab() {
   const dispatch = useAppDispatch();
   const currentPlatform = useAppSelector((state) => state.platform.currentPlatform);
-  const { watches, activeWatchId, comments, replyModal, addWatchModal } = useAppSelector(
+  const { watches, activeWatchId, comments, total, replyModal, addWatchModal } = useAppSelector(
     (state) => state.comments
   );
+  const { t } = useTranslation();
 
   const [watchUrl, setWatchUrl] = useState("");
   const [replyText, setReplyText] = useState("");
@@ -70,10 +72,10 @@ export function CommentsTab() {
       });
       dispatch(closeAddWatchModal());
       setWatchUrl("");
-      dispatch(addToast({ type: "ok", message: "评论监控已添加" }));
+      dispatch(addToast({ type: "ok", message: t("common.success") }));
       loadWatches();
     } catch (e: any) {
-      dispatch(addToast({ type: "err", message: e.message || "添加失败" }));
+      dispatch(addToast({ type: "err", message: e.message || t("common.failed") }));
     } finally {
       dispatch(decrementBusy());
     }
@@ -89,12 +91,23 @@ export function CommentsTab() {
       });
       dispatch(closeReplyModal());
       setReplyText("");
-      dispatch(addToast({ type: "ok", message: "回复已发送" }));
+      dispatch(addToast({ type: "ok", message: t("common.success") }));
       loadComments();
     } catch (e: any) {
-      dispatch(addToast({ type: "err", message: e.message || "回复失败" }));
+      dispatch(addToast({ type: "err", message: e.message || t("common.failed") }));
     } finally {
       dispatch(decrementBusy());
+    }
+  };
+
+  const handleDeleteWatch = async (id: number) => {
+    if (!confirm(t("common.confirm") + "?")) return;
+    try {
+      await api(`/api/comment-watches/${id}`, { method: "DELETE" });
+      dispatch(addToast({ type: "ok", message: t("common.success") }));
+      loadWatches();
+    } catch (e: any) {
+      dispatch(addToast({ type: "err", message: e.message || t("common.failed") }));
     }
   };
 
@@ -102,106 +115,136 @@ export function CommentsTab() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-bold text-slate-100">评论监控</h2>
-          <p className="text-sm text-slate-400 mt-0.5">
-            实时抓取指定作品的最新评论，分析互动情感并支持一键回复
-          </p>
+          <h2 className="text-xl font-bold text-[#f6f8fb]">{t("comments.title")}</h2>
+          <p className="text-sm text-[#778094] mt-0.5">{t("pageContext.comments.desc")}</p>
         </div>
 
-        <Button onClick={() => dispatch(openAddWatchModal())} className="gap-2">
+        <Button onClick={() => dispatch(openAddWatchModal())} className="gap-2 bg-[#fe2c55] hover:bg-[#fe2c55]/90 text-white">
           <Plus className="w-4 h-4" />
-          <span>添加作品监控</span>
+          <span>{t("common.add")}</span>
         </Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Watches List */}
-        <Card className="p-3 space-y-2 max-h-[650px] overflow-y-auto">
-          <h3 className="text-xs font-semibold text-slate-400 px-2 py-1 uppercase">监控作品</h3>
+        {/* Left List: Monitored Works */}
+        <div className="space-y-3">
+          <h3 className="text-sm font-semibold text-[#f6f8fb]">{t("contents.title")}</h3>
           {watches.length === 0 ? (
-            <div className="p-6 text-center text-xs text-slate-500">暂无监控中的作品</div>
+            <Card className="p-8 text-center text-[#778094] text-xs border-dashed border-[#2a3341] bg-[#12161e]">
+              {t("common.empty")}
+            </Card>
           ) : (
-            watches.map((w) => (
-              <div
-                key={w.id}
-                onClick={() => dispatch(setActiveWatchId(w.id))}
-                className={`p-3 rounded-lg flex items-center justify-between gap-3 cursor-pointer transition-colors ${
-                  activeWatchId === w.id
-                    ? "bg-blue-600/20 border border-blue-500/30 text-slate-100"
-                    : "hover:bg-slate-800/60 text-slate-300"
-                }`}
-              >
-                <div className="min-w-0">
-                  <div className="font-semibold text-sm truncate">{w.work_title || `作品 ${w.work_id}`}</div>
-                  <div className="text-xs text-slate-500 mt-0.5">评论: {w.total_comments ?? 0} 条</div>
-                </div>
-                <Badge variant="outline">{w.platform}</Badge>
-              </div>
-            ))
-          )}
-        </Card>
-
-        {/* Comments Feed */}
-        <Card className="md:col-span-2 p-4 flex flex-col min-h-[500px]">
-          {comments.length === 0 ? (
-            <div className="flex-1 flex flex-col items-center justify-center text-slate-500 text-sm">
-              <MessageSquare className="w-8 h-8 mb-2 opacity-50" />
-              暂无评论数据或请选择左侧作品
-            </div>
-          ) : (
-            <div className="space-y-3 overflow-y-auto flex-1 pr-1">
-              {comments.map((c) => (
-                <div
-                  key={c.id}
-                  className="p-3.5 rounded-lg bg-slate-800/40 border border-slate-850 hover:border-slate-700 transition-colors space-y-2"
+            <div className="space-y-2 max-h-[600px] overflow-y-auto pr-1">
+              {watches.map((w) => (
+                <Card
+                  key={w.id}
+                  onClick={() => dispatch(setActiveWatchId(w.id))}
+                  className={`p-3 cursor-pointer transition-all border-[#2a3341] bg-[#12161e] ${
+                    activeWatchId === w.id
+                      ? "border-[#fe2c55] bg-[#fe2c55]/5 shadow-sm"
+                      : "hover:border-[#fe2c55]/40"
+                  }`}
                 >
-                  <div className="flex items-center justify-between">
-                    <div className="font-semibold text-sm text-slate-200">{c.author_name}</div>
-                    <span className="text-xs text-slate-500">{timeAgo(c.create_time)}</span>
-                  </div>
-
-                  <p className="text-sm text-slate-300">{c.content}</p>
-
-                  <div className="flex items-center justify-between pt-2 border-t border-slate-800 text-xs text-slate-500">
-                    <span className="flex items-center gap-1">
-                      <Heart className="w-3.5 h-3.5 text-rose-400" />
-                      {c.like_count ?? 0} 赞
-                    </span>
-
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <div className="font-semibold text-xs text-[#f6f8fb] line-clamp-1">
+                        {w.work_title || `作品 ${w.work_id}`}
+                      </div>
+                      <div className="text-[11px] text-[#778094] mt-0.5">
+                        @{w.author_name || "未知作者"} · {w.total_comments ?? 0} {t("contents.commentsCount")}
+                      </div>
+                    </div>
                     <Button
                       variant="ghost"
-                      size="sm"
-                      onClick={() => dispatch(openReplyModal(c))}
-                      className="gap-1 text-xs"
+                      size="icon"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteWatch(w.id);
+                      }}
+                      className="h-6 w-6 text-[#778094] hover:text-rose-400 shrink-0"
                     >
-                      <Reply className="w-3.5 h-3.5" />
-                      <span>回复</span>
+                      <Trash2 className="w-3 h-3" />
                     </Button>
                   </div>
-                </div>
+                </Card>
               ))}
             </div>
           )}
-        </Card>
+        </div>
+
+        {/* Right List: Comments */}
+        <div className="md:col-span-2 space-y-3">
+          <h3 className="text-sm font-semibold text-[#f6f8fb]">{t("comments.title")} ({total})</h3>
+          {comments.length === 0 ? (
+            <Card className="p-12 text-center text-[#778094] text-xs border-dashed border-[#2a3341] bg-[#12161e]">
+              {t("common.empty")}
+            </Card>
+          ) : (
+            <div className="space-y-3 max-h-[600px] overflow-y-auto pr-1">
+              {comments.map((c) => (
+                <Card key={c.id} className="p-4 space-y-2 border-[#2a3341] bg-[#12161e] hover:border-[#fe2c55]/40 transition-colors">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-7 h-7 rounded-full bg-[#181d27] border border-[#2a3341] flex items-center justify-center text-xs font-bold text-[#f6f8fb]">
+                        {c.author_name?.slice(0, 1) || "U"}
+                      </div>
+                      <div>
+                        <div className="font-semibold text-xs text-[#f6f8fb]">{c.author_name}</div>
+                        <div className="text-[10px] text-[#778094]">{timeAgo(c.create_time)}</div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <span className="flex items-center gap-1 text-xs text-[#778094]">
+                        <Heart className="w-3 h-3" /> {c.like_count ?? 0}
+                      </span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => dispatch(openReplyModal(c))}
+                        className="gap-1 h-7 text-xs text-[#38bdf8]"
+                      >
+                        <Reply className="w-3 h-3" />
+                        <span>{t("comments.reply")}</span>
+                      </Button>
+                    </div>
+                  </div>
+
+                  <p className="text-xs text-[#e7eaf0] pt-1">{c.content}</p>
+
+                  {c.my_reply && (
+                    <div className="p-2.5 rounded-[8px] bg-[#181d27] border border-[#1d2530] text-xs text-[#fe2c55] mt-2">
+                      <span className="font-semibold">{t("comments.reply")}: </span>
+                      <span className="text-[#e7eaf0]">{c.my_reply}</span>
+                    </div>
+                  )}
+                </Card>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Add Watch Modal */}
       <Dialog open={addWatchModal.isOpen} onOpenChange={(open) => !open && dispatch(closeAddWatchModal())}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>添加作品评论监控</DialogTitle>
+            <DialogTitle>{t("comments.title")}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 pt-2">
             <Input
               value={watchUrl}
               onChange={(e) => setWatchUrl(e.target.value)}
-              placeholder="输入目标作品分享链接或 ID"
+              placeholder="输入要监控评论区的作品链接"
+              className="bg-[#0b0f16] border-[#2a3341] text-xs"
             />
             <div className="flex justify-end gap-2">
               <Button variant="ghost" onClick={() => dispatch(closeAddWatchModal())}>
-                取消
+                {t("common.cancel")}
               </Button>
-              <Button onClick={handleAddWatch}>开始监控</Button>
+              <Button onClick={handleAddWatch} className="bg-[#fe2c55] hover:bg-[#fe2c55]/90 text-white">
+                {t("common.confirm")}
+              </Button>
             </div>
           </div>
         </DialogContent>
@@ -211,26 +254,26 @@ export function CommentsTab() {
       <Dialog open={replyModal.isOpen} onOpenChange={(open) => !open && dispatch(closeReplyModal())}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>回复评论</DialogTitle>
+            <DialogTitle>{t("comments.reply")}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 pt-2">
-            {replyModal.comment && (
-              <div className="p-3 rounded-lg bg-slate-800 text-xs text-slate-300">
-                <span className="font-semibold text-slate-200">@{replyModal.comment.author_name}: </span>
-                {replyModal.comment.content}
-              </div>
-            )}
+            <div className="p-3 bg-[#181d27] rounded-[8px] text-xs text-[#8b94a3]">
+              <span className="font-semibold text-[#f6f8fb]">@{replyModal.comment?.author_name}: </span>
+              {replyModal.comment?.content}
+            </div>
             <Textarea
               value={replyText}
               onChange={(e) => setReplyText(e.target.value)}
               placeholder="输入回复内容..."
-              className="min-h-[100px]"
+              className="min-h-[100px] text-xs bg-[#0b0f16] border-[#2a3341]"
             />
             <div className="flex justify-end gap-2">
               <Button variant="ghost" onClick={() => dispatch(closeReplyModal())}>
-                取消
+                {t("common.cancel")}
               </Button>
-              <Button onClick={handleSendReply}>发送回复</Button>
+              <Button onClick={handleSendReply} className="bg-[#fe2c55] hover:bg-[#fe2c55]/90 text-white">
+                {t("common.confirm")}
+              </Button>
             </div>
           </div>
         </DialogContent>

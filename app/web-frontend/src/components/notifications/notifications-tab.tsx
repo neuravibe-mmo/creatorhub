@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Bell, Plus, Trash2, Send, Edit, RefreshCw, CheckCircle2, AlertCircle } from "lucide-react";
+import { useTranslation } from "@/i18n";
 
 const N_TEMPLATES: Record<string, string> = {
   bark: '{\n  "key": "你的Bark设备key",\n  "server": "https://api.day.app"\n}',
@@ -21,6 +22,7 @@ const N_TEMPLATES: Record<string, string> = {
 export function NotificationsTab() {
   const dispatch = useAppDispatch();
   const channels = useAppSelector((state) => state.notifications.channels);
+  const { t } = useTranslation();
 
   // Form State
   const [name, setName] = useState("");
@@ -173,39 +175,40 @@ export function NotificationsTab() {
             <Bell className="w-4 h-4" />
           </div>
           <h3 className="text-sm font-semibold text-[#f6f8fb]">
-            通知推送 <span className="text-xs text-[#778094] font-normal">新作品 / 新评论时提醒</span>
+            {t("notifications.title")}{" "}
+            <span className="text-xs text-[#778094] font-normal">{t("notifications.subtitle")}</span>
           </h3>
         </div>
 
         <div className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="text-[11px] font-medium text-[#778094] block mb-1">渠道备注</label>
+              <label className="text-[11px] font-medium text-[#778094] block mb-1">{t("notifications.channelName")}</label>
               <Input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="例如：运营群通知（可选）"
+                placeholder={t("notifications.channelNamePlaceholder")}
                 className="h-9 bg-[#0b0f16] border-[#2a3341] text-xs"
               />
             </div>
 
             <div>
-              <label className="text-[11px] font-medium text-[#778094] block mb-1">渠道类型</label>
+              <label className="text-[11px] font-medium text-[#778094] block mb-1">{t("notifications.channelType")}</label>
               <Select value={type} onValueChange={handleTypeChange}>
                 <SelectTrigger className="h-9 bg-[#0b0f16] border-[#2a3341] text-xs">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="bg-[#12161e] border-[#2a3341]">
-                  <SelectItem value="bark">Bark</SelectItem>
-                  <SelectItem value="dingtalk">钉钉</SelectItem>
-                  <SelectItem value="telegram">Telegram</SelectItem>
+                  <SelectItem value="bark">{t("notifications.types.bark")}</SelectItem>
+                  <SelectItem value="dingtalk">{t("notifications.types.dingtalk")}</SelectItem>
+                  <SelectItem value="telegram">{t("notifications.types.telegram")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
 
           <div>
-            <label className="text-[11px] font-medium text-[#778094] block mb-1">渠道配置 JSON</label>
+            <label className="text-[11px] font-medium text-[#778094] block mb-1">{t("notifications.channelConfig")}</label>
             <Textarea
               value={configText}
               onChange={(e) => setConfigText(e.target.value)}
@@ -213,16 +216,16 @@ export function NotificationsTab() {
               spellCheck={false}
               className="bg-[#0b0f16] border-[#2a3341] text-xs font-mono"
             />
-            <div className="text-[10px] text-[#778094] mt-1">切换渠道类型时会自动填入所需字段模板</div>
+            <div className="text-[10px] text-[#778094] mt-1">{t("notifications.configHelp")}</div>
           </div>
 
           <div className="flex items-center justify-end pt-1">
             <Button
               onClick={handleAddChannel}
-              className="gap-1.5 h-8 bg-[#fe2c55] hover:bg-[#fe2c55]/90 text-xs"
+              className="gap-1.5 h-8 bg-[#fe2c55] hover:bg-[#fe2c55]/90 text-xs text-white"
             >
               <Plus className="w-3.5 h-3.5" />
-              <span>添加通知渠道</span>
+              <span>{t("notifications.addBtn")}</span>
             </Button>
           </div>
         </div>
@@ -234,7 +237,8 @@ export function NotificationsTab() {
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <div className="text-xs font-semibold text-[#f6f8fb]">
-              已配置渠道 <span className="text-[11px] text-[#778094] font-normal">可单独测试、停用或编辑</span>
+              {t("notifications.configuredChannels")}{" "}
+              <span className="text-[11px] text-[#778094] font-normal">{t("notifications.configuredSub")}</span>
             </div>
             <Button
               variant="ghost"
@@ -250,16 +254,16 @@ export function NotificationsTab() {
             <table className="w-full text-left text-xs border-collapse">
               <thead>
                 <tr className="border-b border-[#1d2530] text-[#778094]">
-                  <th className="py-2.5 px-3 font-medium">渠道名称 / 类型</th>
-                  <th className="py-2.5 px-3 font-medium">状态</th>
-                  <th className="py-2.5 px-3 font-medium text-right">操作</th>
+                  <th className="py-2.5 px-3 font-medium">{t("notifications.cols.nameType")}</th>
+                  <th className="py-2.5 px-3 font-medium">{t("notifications.cols.status")}</th>
+                  <th className="py-2.5 px-3 font-medium text-right">{t("notifications.cols.actions")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#1d2530]">
                 {channels.length === 0 ? (
                   <tr>
                     <td colSpan={3} className="py-8 text-center text-[#778094]">
-                      还没有通知渠道，添加 Bark / 钉钉 / Telegram 渠道，有新作品或新评论时推送给你
+                      {t("notifications.empty")}
                     </td>
                   </tr>
                 ) : (
@@ -276,7 +280,7 @@ export function NotificationsTab() {
 
                       <td className="py-3 px-3">
                         <Badge variant={c.enabled ? "success" : "secondary"}>
-                          {c.enabled ? "启用" : "停用"}
+                          {c.enabled ? t("autocomment.ruleActive") : t("autocomment.rulePaused")}
                         </Badge>
                       </td>
 
@@ -288,7 +292,7 @@ export function NotificationsTab() {
                             onClick={() => openEdit(c)}
                             className="h-7 text-xs"
                           >
-                            编辑
+                            {t("autocomment.btnEdit")}
                           </Button>
                           <Button
                             variant="ghost"
@@ -296,7 +300,7 @@ export function NotificationsTab() {
                             onClick={() => handleTestChannel(c.id)}
                             className="h-7 text-xs text-[#38bdf8]"
                           >
-                            测试
+                            {t("proxies.testLatency")}
                           </Button>
                           <Button
                             variant="ghost"
@@ -304,7 +308,7 @@ export function NotificationsTab() {
                             onClick={() => handleToggle(c.id, !c.enabled)}
                             className="h-7 text-xs"
                           >
-                            {c.enabled ? "停用" : "启用"}
+                            {c.enabled ? t("autocomment.rulePaused") : t("autocomment.ruleActive")}
                           </Button>
                           <Button
                             variant="ghost"
@@ -329,15 +333,15 @@ export function NotificationsTab() {
       <Dialog open={editOpen} onOpenChange={setEditOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>编辑通知渠道</DialogTitle>
+            <DialogTitle>{t("notifications.title")}</DialogTitle>
             <DialogDescription>
-              类型：{editingChannel?.type} · 修改密钥或地址后建议立即发送测试通知。
+              {t("notifications.configuredSub")}
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-3.5 pt-2">
             <div>
-              <label className="text-[11px] font-medium text-[#778094] block mb-1">渠道名称</label>
+              <label className="text-[11px] font-medium text-[#778094] block mb-1">{t("notifications.channelName")}</label>
               <Input
                 value={editName}
                 onChange={(e) => setEditName(e.target.value)}
@@ -347,7 +351,7 @@ export function NotificationsTab() {
             </div>
 
             <div>
-              <label className="text-[11px] font-medium text-[#778094] block mb-1">配置 JSON</label>
+              <label className="text-[11px] font-medium text-[#778094] block mb-1">{t("notifications.channelConfig")}</label>
               <Textarea
                 value={editConfigText}
                 onChange={(e) => setEditConfigText(e.target.value)}
@@ -359,10 +363,10 @@ export function NotificationsTab() {
 
             <div className="flex justify-end gap-2 pt-2 border-t border-[#1d2530]">
               <Button variant="ghost" onClick={() => setEditOpen(false)}>
-                取消
+                {t("common.cancel")}
               </Button>
-              <Button onClick={handleSaveEdit} className="bg-[#fe2c55] hover:bg-[#fe2c55]/90">
-                保存修改
+              <Button onClick={handleSaveEdit} className="bg-[#fe2c55] hover:bg-[#fe2c55]/90 text-white">
+                {t("common.save")}
               </Button>
             </div>
           </div>

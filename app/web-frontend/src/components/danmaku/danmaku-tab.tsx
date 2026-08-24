@@ -16,15 +16,17 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Tv, Plus, Download, BarChart2 } from "lucide-react";
+import { Tv, Plus, BarChart2 } from "lucide-react";
 import { formatSec, timeAgo } from "@/lib/utils";
+import { useTranslation } from "@/i18n";
 
 export function DanmakuTab() {
   const dispatch = useAppDispatch();
   const currentPlatform = useAppSelector((state) => state.platform.currentPlatform);
-  const { watches, activeWatchId, danmakus, addWatchModal } = useAppSelector(
+  const { watches, activeWatchId, danmakus, total, addWatchModal } = useAppSelector(
     (state) => state.danmaku
   );
+  const { t } = useTranslation();
 
   const [danmakuUrl, setDanmakuUrl] = useState("");
 
@@ -66,10 +68,10 @@ export function DanmakuTab() {
       });
       dispatch(closeAddWatchModal());
       setDanmakuUrl("");
-      dispatch(addToast({ type: "ok", message: "弹幕监控已添加" }));
+      dispatch(addToast({ type: "ok", message: t("common.success") }));
       loadWatches();
     } catch (e: any) {
-      dispatch(addToast({ type: "err", message: e.message || "添加失败" }));
+      dispatch(addToast({ type: "err", message: e.message || t("common.failed") }));
     } finally {
       dispatch(decrementBusy());
     }
@@ -79,89 +81,103 @@ export function DanmakuTab() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-bold text-slate-100">短视频弹幕监控</h2>
-          <p className="text-sm text-slate-400 mt-0.5">
-            抓取短视频全量弹幕，生成时间轴密度图并支持 Excel 导出
+          <h2 className="text-xl font-bold text-[#f6f8fb]">{t("danmaku.title")}</h2>
+          <p className="text-sm text-[#778094] mt-0.5">
+            {t("pageContext.danmaku.desc")}
           </p>
         </div>
 
-        <Button onClick={() => dispatch(openAddWatchModal())} className="gap-2">
+        <Button onClick={() => dispatch(openAddWatchModal())} className="gap-2 bg-[#fe2c55] hover:bg-[#fe2c55]/90 text-white">
           <Plus className="w-4 h-4" />
-          <span>添加弹幕监控</span>
+          <span>{t("common.add")}</span>
         </Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Watches List */}
-        <Card className="p-3 space-y-2 max-h-[650px] overflow-y-auto">
-          <h3 className="text-xs font-semibold text-slate-400 px-2 py-1 uppercase">视频列表</h3>
+        <Card className="p-3 space-y-2 max-h-[650px] overflow-y-auto border-[#2a3341] bg-[#12161e]">
+          <h3 className="text-xs font-semibold text-[#778094] px-2 py-1 uppercase">{t("contents.title")}</h3>
           {watches.length === 0 ? (
-            <div className="p-6 text-center text-xs text-slate-500">暂无监控视频</div>
+            <div className="p-6 text-center text-xs text-[#778094]">{t("common.empty")}</div>
           ) : (
             watches.map((w) => (
-              <div
+              <button
                 key={w.id}
                 onClick={() => dispatch(setActiveWatchId(w.id))}
-                className={`p-3 rounded-lg flex items-center justify-between gap-3 cursor-pointer transition-colors ${
+                className={`w-full p-2.5 rounded-[8px] text-left transition-colors flex items-center gap-2.5 ${
                   activeWatchId === w.id
-                    ? "bg-blue-600/20 border border-blue-500/30 text-slate-100"
-                    : "hover:bg-slate-800/60 text-slate-300"
+                    ? "bg-[#181d27] border border-[#fe2c55]/40 text-[#fe2c55]"
+                    : "text-[#8b94a3] hover:bg-[#181d27]/50"
                 }`}
               >
-                <div className="min-w-0">
-                  <div className="font-semibold text-sm truncate">{w.title || `视频 ${w.video_id}`}</div>
-                  <div className="text-xs text-slate-500 mt-0.5">弹幕: {w.danmaku_count ?? 0} 条</div>
+                <div className="w-9 h-9 rounded-[8px] bg-[#0b0f16] flex items-center justify-center shrink-0">
+                  <Tv className="w-4 h-4 text-[#778094]" />
                 </div>
-              </div>
+                <div className="min-w-0 flex-1">
+                  <div className="font-semibold text-xs text-[#f6f8fb] truncate">{w.title}</div>
+                  <div className="text-[11px] text-[#778094] mt-0.5">
+                    {w.danmaku_count ?? 0} 条弹幕 · {timeAgo(w.last_sync_at)}
+                  </div>
+                </div>
+              </button>
             ))
           )}
         </Card>
 
-        {/* Danmaku Feed */}
-        <Card className="md:col-span-2 p-4 flex flex-col min-h-[500px]">
-          {danmakus.length === 0 ? (
-            <div className="flex-1 flex flex-col items-center justify-center text-slate-500 text-sm">
-              <Tv className="w-8 h-8 mb-2 opacity-50" />
-              暂无弹幕数据
-            </div>
-          ) : (
-            <div className="space-y-3 overflow-y-auto flex-1 pr-1">
-              {danmakus.map((d) => (
+        {/* Danmaku Items Stream */}
+        <Card className="md:col-span-2 p-5 space-y-4 max-h-[650px] flex flex-col justify-between border-[#2a3341] bg-[#12161e]">
+          <div className="flex items-center justify-between pb-3 border-b border-[#1d2530]">
+            <h3 className="text-sm font-semibold text-[#f6f8fb] flex items-center gap-2">
+              <BarChart2 className="w-4 h-4 text-[#fe2c55]" />
+              <span>{t("danmaku.timeline")} ({total})</span>
+            </h3>
+          </div>
+
+          <div className="flex-1 overflow-y-auto space-y-2 pr-1">
+            {danmakus.length === 0 ? (
+              <div className="h-48 flex items-center justify-center text-xs text-[#778094]">
+                {t("common.empty")}
+              </div>
+            ) : (
+              danmakus.map((dm) => (
                 <div
-                  key={d.id}
-                  className="p-3 rounded-lg bg-slate-800/40 border border-slate-850 flex items-center justify-between gap-3 text-sm"
+                  key={dm.id}
+                  className="p-2.5 rounded-[8px] bg-[#181d27]/60 border border-[#1d2530] flex items-center justify-between text-xs"
                 >
                   <div className="flex items-center gap-3">
-                    <span className="px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 font-mono text-xs">
-                      {formatSec(Math.floor(d.video_time_ms / 1000))}
+                    <span className="font-mono text-[11px] text-[#fe2c55] font-semibold">
+                      {formatSec(dm.video_time_ms / 1000)}
                     </span>
-                    <span className="text-slate-200">{d.text}</span>
+                    <span className="text-[#f6f8fb]">{dm.text}</span>
                   </div>
-                  <span className="text-xs text-slate-500 font-mono">{timeAgo(d.send_time)}</span>
+                  <span className="text-[10px] text-[#778094]">{timeAgo(dm.send_time)}</span>
                 </div>
-              ))}
-            </div>
-          )}
+              ))
+            )}
+          </div>
         </Card>
       </div>
 
-      {/* Add Danmaku Watch Modal */}
+      {/* Add Watch Modal */}
       <Dialog open={addWatchModal.isOpen} onOpenChange={(open) => !open && dispatch(closeAddWatchModal())}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>添加视频弹幕监控</DialogTitle>
+            <DialogTitle>{t("danmaku.title")}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 pt-2">
             <Input
               value={danmakuUrl}
               onChange={(e) => setDanmakuUrl(e.target.value)}
-              placeholder="输入短视频分享链接或 ID"
+              placeholder="输入视频播放链接"
+              className="bg-[#0b0f16] border-[#2a3341] text-xs"
             />
             <div className="flex justify-end gap-2">
               <Button variant="ghost" onClick={() => dispatch(closeAddWatchModal())}>
-                取消
+                {t("common.cancel")}
               </Button>
-              <Button onClick={handleAddWatch}>开始抓取</Button>
+              <Button onClick={handleAddWatch} className="bg-[#fe2c55] hover:bg-[#fe2c55]/90 text-white">
+                {t("common.confirm")}
+              </Button>
             </div>
           </div>
         </DialogContent>

@@ -31,6 +31,7 @@ import {
   Link2,
 } from "lucide-react";
 import { humanBytes, timeAgo } from "@/lib/utils";
+import { useTranslation } from "@/i18n";
 
 const PF_NAMES: Record<string, string> = {
   douyin: "抖音",
@@ -46,6 +47,7 @@ const PF_NAMES: Record<string, string> = {
 export function ShareDownloadTab() {
   const dispatch = useAppDispatch();
   const accounts = useAppSelector((state) => state.accounts.items);
+  const { t } = useTranslation();
 
   // Form states
   const [shareText, setShareText] = useState("");
@@ -285,19 +287,20 @@ export function ShareDownloadTab() {
             <Download className="w-4 h-4" />
           </div>
           <h3 className="text-sm font-semibold text-[#f6f8fb]">
-            通用链接下载 <span className="text-xs text-[#778094] font-normal">整段分享文案直接粘贴</span>
+            {t("shareDownload.cardTitle")}{" "}
+            <span className="text-xs text-[#778094] font-normal">{t("shareDownload.cardSub")}</span>
           </h3>
         </div>
 
         <div className="space-y-4">
           <div>
             <label className="text-[11px] font-medium text-[#778094] block mb-1">
-              分享链接 / 分享口令 / 含中文和符号的完整文案
+              {t("shareDownload.cardTitle")}
             </label>
             <Textarea
               value={shareText}
               onChange={(e) => setShareText(e.target.value)}
-              placeholder={"例如：复制这段内容，打开对应平台查看作品 https://v.douyin.com/xxxx/ 😄\n支持全角符号、HTML 实体、URL 编码、Unicode 转义和一段文字中的多个链接"}
+              placeholder={t("shareDownload.placeholder")}
               rows={4}
               className="bg-[#0b0f16] border-[#2a3341] text-xs font-mono"
             />
@@ -306,30 +309,30 @@ export function ShareDownloadTab() {
           {/* 4 Column Form Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             <div>
-              <label className="text-[11px] font-medium text-[#778094] block mb-1">下载画质</label>
+              <label className="text-[11px] font-medium text-[#778094] block mb-1">{t("shareDownload.quality")}</label>
               <Select value={quality} onValueChange={setQuality}>
                 <SelectTrigger className="h-9 bg-[#0b0f16] border-[#2a3341] text-xs">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="bg-[#12161e] border-[#2a3341]">
-                  <SelectItem value="highest">原画 / 最高</SelectItem>
-                  <SelectItem value="1080">1080P</SelectItem>
-                  <SelectItem value="720">720P</SelectItem>
-                  <SelectItem value="540">540P</SelectItem>
-                  <SelectItem value="lowest">最低省流</SelectItem>
-                  <SelectItem value="audio">仅音频</SelectItem>
+                  <SelectItem value="highest">{t("shareDownload.qualities.highest")}</SelectItem>
+                  <SelectItem value="1080">{t("shareDownload.qualities.p1080")}</SelectItem>
+                  <SelectItem value="720">{t("shareDownload.qualities.p720")}</SelectItem>
+                  <SelectItem value="540">{t("shareDownload.qualities.p540")}</SelectItem>
+                  <SelectItem value="lowest">{t("shareDownload.qualities.lowest")}</SelectItem>
+                  <SelectItem value="audio">{t("shareDownload.qualities.audio")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div>
-              <label className="text-[11px] font-medium text-[#778094] block mb-1">复用登录账号</label>
+              <label className="text-[11px] font-medium text-[#778094] block mb-1">{t("shareDownload.accountReuse")}</label>
               <Select value={selectedAccountId} onValueChange={setSelectedAccountId}>
                 <SelectTrigger className="h-9 bg-[#0b0f16] border-[#2a3341] text-xs">
-                  <SelectValue placeholder="不使用账号登录态" />
+                  <SelectValue placeholder={t("shareDownload.noAccount")} />
                 </SelectTrigger>
                 <SelectContent className="bg-[#12161e] border-[#2a3341]">
-                  <SelectItem value="none">不使用账号登录态</SelectItem>
+                  <SelectItem value="none">{t("shareDownload.noAccount")}</SelectItem>
                   {accounts.map((a) => (
                     <SelectItem key={a.id} value={String(a.id)}>
                       {a.platform} · {a.nickname}
@@ -340,24 +343,24 @@ export function ShareDownloadTab() {
             </div>
 
             <div>
-              <label className="text-[11px] font-medium text-[#778094] block mb-1">保存目录</label>
+              <label className="text-[11px] font-medium text-[#778094] block mb-1">{t("shareDownload.defaultDir")}</label>
               <Input
                 value={outputDir}
                 onChange={(e) => setOutputDir(e.target.value)}
-                placeholder="留空使用全局目录 / share"
+                placeholder={t("shareDownload.dirPlaceholder")}
                 className="h-9 bg-[#0b0f16] border-[#2a3341] text-xs font-mono"
               />
             </div>
 
             <div>
-              <label className="text-[11px] font-medium text-[#778094] block mb-1">文件上限 (MB)</label>
+              <label className="text-[11px] font-medium text-[#778094] block mb-1">{t("shareDownload.maxSize")}</label>
               <Input
                 type="number"
                 min={0}
                 max={102400}
                 value={maxSizeMb}
                 onChange={(e) => setMaxSizeMb(Number(e.target.value))}
-                placeholder="0 = 不限"
+                placeholder={t("shareDownload.maxSizePlaceholder")}
                 className="h-9 bg-[#0b0f16] border-[#2a3341] text-xs font-mono"
               />
             </div>
@@ -373,8 +376,8 @@ export function ShareDownloadTab() {
                 className="rounded border-[#2a3341] bg-[#0b0f16] text-[#fe2c55]"
               />
               <div>
-                <div className="font-semibold text-[#f6f8fb]">元数据 JSON</div>
-                <div className="text-[10px] text-[#778094]">保存作品详细信息</div>
+                <div className="font-semibold text-[#f6f8fb]">{t("shareDownload.saveMetadata")}</div>
+                <div className="text-[10px] text-[#778094]">{t("shareDownload.saveMetadataHelp")}</div>
               </div>
             </label>
 
@@ -386,8 +389,8 @@ export function ShareDownloadTab() {
                 className="rounded border-[#2a3341] bg-[#0b0f16] text-[#fe2c55]"
               />
               <div>
-                <div className="font-semibold text-[#f6f8fb]">作品封面</div>
-                <div className="text-[10px] text-[#778094]">保存原始封面图片</div>
+                <div className="font-semibold text-[#f6f8fb]">{t("shareDownload.saveThumbnail")}</div>
+                <div className="text-[10px] text-[#778094]">{t("shareDownload.saveThumbnailHelp")}</div>
               </div>
             </label>
 
@@ -399,8 +402,8 @@ export function ShareDownloadTab() {
                 className="rounded border-[#2a3341] bg-[#0b0f16] text-[#fe2c55]"
               />
               <div>
-                <div className="font-semibold text-[#f6f8fb]">字幕文件</div>
-                <div className="text-[10px] text-[#778094]">有字幕时一并保存</div>
+                <div className="font-semibold text-[#f6f8fb]">{t("shareDownload.saveSubtitles")}</div>
+                <div className="text-[10px] text-[#778094]">{t("shareDownload.saveSubtitlesHelp")}</div>
               </div>
             </label>
 
@@ -412,8 +415,8 @@ export function ShareDownloadTab() {
                 className="rounded border-[#2a3341] bg-[#0b0f16] text-[#fe2c55]"
               />
               <div>
-                <div className="font-semibold text-[#f6f8fb]">全部链接</div>
-                <div className="text-[10px] text-[#778094]">处理文案里的每个链接</div>
+                <div className="font-semibold text-[#f6f8fb]">{t("shareDownload.allLinks")}</div>
+                <div className="text-[10px] text-[#778094]">{t("shareDownload.allLinksHelp")}</div>
               </div>
             </label>
           </div>
@@ -427,7 +430,7 @@ export function ShareDownloadTab() {
               className="gap-1.5 text-xs text-[#e7eaf0] border-[#2a3341] bg-[#181d27]"
             >
               <Zap className="w-3.5 h-3.5 text-[#38bdf8]" />
-              <span>识别链接</span>
+              <span>{t("shareDownload.parseLinks")}</span>
             </Button>
 
             <Button
@@ -437,7 +440,7 @@ export function ShareDownloadTab() {
               className="gap-1.5 text-xs text-[#e7eaf0] border-[#2a3341] bg-[#181d27]"
             >
               <Eye className="w-3.5 h-3.5 text-[#fbbf24]" />
-              <span>只读取作品信息</span>
+              <span>{t("shareDownload.inspectOnly")}</span>
             </Button>
 
             <Button
@@ -446,7 +449,7 @@ export function ShareDownloadTab() {
               className="gap-1.5 text-xs bg-[#fe2c55] hover:bg-[#fe2c55]/90 text-white"
             >
               <Download className="w-3.5 h-3.5" />
-              <span>开始下载</span>
+              <span>{t("shareDownload.startDownload")}</span>
             </Button>
           </div>
 
@@ -510,7 +513,7 @@ export function ShareDownloadTab() {
               <Download className="w-4 h-4" />
             </div>
             <h3 className="text-sm font-semibold text-[#f6f8fb]">
-              下载历史 <span className="text-xs text-[#778094] font-normal">{history.length} 条</span>
+              {t("shareDownload.history")} <span className="text-xs text-[#778094] font-normal">{history.length}</span>
             </h3>
           </div>
 
@@ -521,14 +524,14 @@ export function ShareDownloadTab() {
             className="gap-1 text-xs text-[#778094] hover:text-[#f6f8fb]"
           >
             <RefreshCw className="w-3.5 h-3.5" />
-            <span>刷新</span>
+            <span>{t("common.refresh")}</span>
           </Button>
         </div>
 
         {/* Toolbar */}
         <div className="flex flex-wrap items-center gap-2.5 pb-1">
           <Input
-            placeholder="搜索作品描述 / 作者 / ID"
+            placeholder={t("shareDownload.searchPlaceholder")}
             value={historySearch}
             onChange={(e) => setHistorySearch(e.target.value)}
             className="h-8 max-w-[220px] bg-[#0b0f16] border-[#2a3341] text-xs"
@@ -537,10 +540,10 @@ export function ShareDownloadTab() {
           <div className="w-28">
             <Select value={historyPlatform} onValueChange={setHistoryPlatform}>
               <SelectTrigger className="h-8 bg-[#0b0f16] border-[#2a3341] text-xs">
-                <SelectValue placeholder="全部平台" />
+                <SelectValue placeholder={t("contents.filterPlatform")} />
               </SelectTrigger>
               <SelectContent className="bg-[#12161e] border-[#2a3341]">
-                <SelectItem value="all">全部平台</SelectItem>
+                <SelectItem value="all">{t("common.all")}</SelectItem>
                 <SelectItem value="douyin">抖音</SelectItem>
                 <SelectItem value="xhs">小红书</SelectItem>
                 <SelectItem value="kuaishou">快手</SelectItem>
@@ -553,10 +556,10 @@ export function ShareDownloadTab() {
           <div className="w-28">
             <Select value={historyType} onValueChange={setHistoryType}>
               <SelectTrigger className="h-8 bg-[#0b0f16] border-[#2a3341] text-xs">
-                <SelectValue placeholder="全部类型" />
+                <SelectValue placeholder={t("common.all")} />
               </SelectTrigger>
               <SelectContent className="bg-[#12161e] border-[#2a3341]">
-                <SelectItem value="all">全部类型</SelectItem>
+                <SelectItem value="all">{t("common.all")}</SelectItem>
                 <SelectItem value="video">视频</SelectItem>
                 <SelectItem value="images">图文</SelectItem>
               </SelectContent>
@@ -566,10 +569,10 @@ export function ShareDownloadTab() {
           <div className="w-28">
             <Select value={historyStatus} onValueChange={setHistoryStatus}>
               <SelectTrigger className="h-8 bg-[#0b0f16] border-[#2a3341] text-xs">
-                <SelectValue placeholder="全部状态" />
+                <SelectValue placeholder={t("common.all")} />
               </SelectTrigger>
               <SelectContent className="bg-[#12161e] border-[#2a3341]">
-                <SelectItem value="all">全部状态</SelectItem>
+                <SelectItem value="all">{t("common.all")}</SelectItem>
                 <SelectItem value="done">已下载</SelectItem>
                 <SelectItem value="failed">失败</SelectItem>
               </SelectContent>
@@ -578,14 +581,14 @@ export function ShareDownloadTab() {
 
           {selectedHistoryIds.length > 0 && (
             <div className="flex items-center gap-2 ml-auto">
-              <span className="text-xs text-[#8b94a3]">已选 {selectedHistoryIds.length}</span>
+              <span className="text-xs text-[#8b94a3]">{t("shareDownload.selectedCount", { count: selectedHistoryIds.length })}</span>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => setSelectedHistoryIds([])}
                 className="h-7 text-xs"
               >
-                取消
+                {t("common.cancel")}
               </Button>
               <Button
                 size="sm"
@@ -593,7 +596,7 @@ export function ShareDownloadTab() {
                 className="h-7 text-xs bg-rose-600 hover:bg-rose-700 text-white gap-1"
               >
                 <Trash2 className="w-3.5 h-3.5" />
-                <span>批量删除</span>
+                <span>{t("common.batchDelete")}</span>
               </Button>
             </div>
           )}
@@ -606,7 +609,7 @@ export function ShareDownloadTab() {
               className="h-8 text-xs border-[#2a3341] bg-[#181d27] gap-1"
             >
               <Download className="w-3 h-3" />
-              <span>当前结果</span>
+              <span>{t("shareDownload.exportCurrent")}</span>
             </Button>
             <Button
               variant="outline"
@@ -615,7 +618,7 @@ export function ShareDownloadTab() {
               className="h-8 text-xs border-[#2a3341] bg-[#181d27] gap-1"
             >
               <Download className="w-3 h-3" />
-              <span>全部数据</span>
+              <span>{t("shareDownload.exportAll")}</span>
             </Button>
           </div>
         </div>
@@ -633,20 +636,20 @@ export function ShareDownloadTab() {
                     className="rounded border-[#2a3341] bg-[#0b0f16] text-[#fe2c55]"
                   />
                 </th>
-                <th className="py-2.5 px-3 font-medium w-16">封面</th>
-                <th className="py-2.5 px-3 font-medium">作品描述</th>
-                <th className="py-2.5 px-3 font-medium">类型</th>
-                <th className="py-2.5 px-3 font-medium">发布时间</th>
-                <th className="py-2.5 px-3 font-medium">数据</th>
-                <th className="py-2.5 px-3 font-medium">状态 / 操作</th>
-                <th className="py-2.5 px-3 font-medium">本地文件</th>
+                <th className="py-2.5 px-3 font-medium w-16">{t("shareDownload.cols.cover")}</th>
+                <th className="py-2.5 px-3 font-medium">{t("shareDownload.cols.desc")}</th>
+                <th className="py-2.5 px-3 font-medium">{t("shareDownload.cols.type")}</th>
+                <th className="py-2.5 px-3 font-medium">{t("shareDownload.cols.publishTime")}</th>
+                <th className="py-2.5 px-3 font-medium">{t("shareDownload.cols.metrics")}</th>
+                <th className="py-2.5 px-3 font-medium">{t("shareDownload.cols.statusActions")}</th>
+                <th className="py-2.5 px-3 font-medium">{t("shareDownload.cols.localFile")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#1d2530]">
               {paginatedHistory.length === 0 ? (
                 <tr>
                   <td colSpan={8} className="py-8 text-center text-[#778094]">
-                    暂无下载历史
+                    {t("shareDownload.emptyHistory")}
                   </td>
                 </tr>
               ) : (

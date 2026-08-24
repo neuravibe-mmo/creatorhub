@@ -19,14 +19,16 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/input";
-import { QrCode, KeyRound, RefreshCw, Trash2, Globe, Shield, UserPlus, CheckCircle2 } from "lucide-react";
+import { QrCode, KeyRound, RefreshCw, Trash2, UserPlus } from "lucide-react";
 import { timeAgo } from "@/lib/utils";
+import { useTranslation } from "@/i18n";
 
 export function AccountsTab() {
   const dispatch = useAppDispatch();
   const currentPlatform = useAppSelector((state) => state.platform.currentPlatform);
   const { items, isLoading, qrModal, cookieModal } = useAppSelector((state) => state.accounts);
   const [cookieText, setCookieText] = useState("");
+  const { t } = useTranslation();
 
   const loadAccounts = async () => {
     dispatch(setLoading(true));
@@ -34,7 +36,7 @@ export function AccountsTab() {
       const data = await api<Account[]>(`/api/accounts?platform=${currentPlatform}`);
       dispatch(setAccounts(data || []));
     } catch (e: any) {
-      dispatch(addToast({ type: "err", message: e.message || "加载账号失败" }));
+      dispatch(addToast({ type: "err", message: e.message || t("common.failed") }));
     } finally {
       dispatch(setLoading(false));
     }
@@ -90,7 +92,7 @@ export function AccountsTab() {
         if (res.status === "confirmed" || res.status === "success") {
           clearInterval(timer);
           dispatch(closeQrModal());
-          dispatch(addToast({ type: "ok", message: "扫码登录成功！" }));
+          dispatch(addToast({ type: "ok", message: t("common.success") }));
           loadAccounts();
         } else if (res.status === "scanned") {
           dispatch(updateQrStatus({ statusText: "已扫码，请在手机上点击确认" }));
@@ -106,45 +108,45 @@ export function AccountsTab() {
 
   const handleSaveCookie = async () => {
     if (!cookieText.trim()) return;
-    dispatch(incrementBusy("正在保存 Cookie..."));
+    dispatch(incrementBusy(t("common.saving")));
     try {
       await api("/api/accounts/cookie", {
         method: "POST",
         body: JSON.stringify({ platform: currentPlatform, cookie: cookieText.trim() }),
       });
       dispatch(closeCookieModal());
-      dispatch(addToast({ type: "ok", message: "Cookie 保存成功" }));
+      dispatch(addToast({ type: "ok", message: t("common.success") }));
       setCookieText("");
       loadAccounts();
     } catch (e: any) {
-      dispatch(addToast({ type: "err", message: e.message || "保存失败" }));
+      dispatch(addToast({ type: "err", message: e.message || t("common.failed") }));
     } finally {
       dispatch(decrementBusy());
     }
   };
 
   const handleDeleteAccount = async (id: string | number) => {
-    if (!confirm("确定要删除此账号吗？")) return;
-    dispatch(incrementBusy("正在删除账号..."));
+    if (!confirm(t("common.confirm") + "?")) return;
+    dispatch(incrementBusy(t("common.loading")));
     try {
       await api(`/api/accounts/${id}`, { method: "DELETE" });
-      dispatch(addToast({ type: "ok", message: "账号已删除" }));
+      dispatch(addToast({ type: "ok", message: t("common.success") }));
       loadAccounts();
     } catch (e: any) {
-      dispatch(addToast({ type: "err", message: e.message || "删除失败" }));
+      dispatch(addToast({ type: "err", message: e.message || t("common.failed") }));
     } finally {
       dispatch(decrementBusy());
     }
   };
 
   const handleSyncStats = async (id: string | number) => {
-    dispatch(incrementBusy("正在同步账号数据..."));
+    dispatch(incrementBusy(t("common.loading")));
     try {
       await api(`/api/accounts/${id}/sync`, { method: "POST" });
-      dispatch(addToast({ type: "ok", message: "数据同步完成" }));
+      dispatch(addToast({ type: "ok", message: t("common.success") }));
       loadAccounts();
     } catch (e: any) {
-      dispatch(addToast({ type: "err", message: e.message || "同步失败" }));
+      dispatch(addToast({ type: "err", message: e.message || t("common.failed") }));
     } finally {
       dispatch(decrementBusy());
     }
@@ -154,26 +156,24 @@ export function AccountsTab() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-bold text-slate-100">账号管理</h2>
-          <p className="text-sm text-slate-400 mt-0.5">
-            管理当前平台的授权账号，支持扫码登录、Cookie 注入与数据同步
-          </p>
+          <h2 className="text-xl font-bold text-[#f6f8fb]">{t("accounts.title")}</h2>
+          <p className="text-sm text-[#778094] mt-0.5">{t("accounts.subtitle")}</p>
         </div>
 
         <div className="flex items-center gap-2.5 flex-wrap">
-          <Button onClick={() => startQrLogin("normal")} className="gap-2">
+          <Button onClick={() => startQrLogin("normal")} className="gap-2 bg-[#fe2c55] hover:bg-[#fe2c55]/90 text-white">
             <QrCode className="w-4 h-4" />
-            <span>扫码登录</span>
+            <span>{t("accounts.qrLogin")}</span>
           </Button>
           {currentPlatform !== "shipinhao" && (
-            <Button variant="secondary" onClick={() => startQrLogin("creator")} className="gap-2">
+            <Button variant="secondary" onClick={() => startQrLogin("creator")} className="gap-2 border-[#2a3341] bg-[#181d27] text-[#e7eaf0]">
               <UserPlus className="w-4 h-4" />
-              <span>创作者登录</span>
+              <span>{t("accounts.addAccount")}</span>
             </Button>
           )}
-          <Button variant="outline" onClick={() => dispatch(openCookieModal())} className="gap-2">
+          <Button variant="outline" onClick={() => dispatch(openCookieModal())} className="gap-2 border-[#2a3341] bg-[#12161e] text-[#8b94a3]">
             <KeyRound className="w-4 h-4" />
-            <span>Cookie 粘贴</span>
+            <span>{t("accounts.cookieLogin")}</span>
           </Button>
         </div>
       </div>
@@ -181,26 +181,26 @@ export function AccountsTab() {
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {[1, 2, 3].map((i) => (
-            <Card key={i} className="h-44 animate-pulse bg-slate-800/40" />
+            <Card key={i} className="h-44 animate-pulse bg-[#12161e] border-[#2a3341]" />
           ))}
         </div>
       ) : items.length === 0 ? (
-        <Card className="flex flex-col items-center justify-center p-12 text-center border-dashed">
-          <div className="w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center text-slate-400 mb-3">
+        <Card className="flex flex-col items-center justify-center p-12 text-center border-dashed border-[#2a3341] bg-[#12161e]">
+          <div className="w-12 h-12 rounded-full bg-[#181d27] flex items-center justify-center text-[#778094] mb-3">
             <UserPlus className="w-6 h-6" />
           </div>
-          <h3 className="text-sm font-semibold text-slate-200">暂无托管账号</h3>
-          <p className="text-xs text-slate-500 mt-1 max-w-sm">
-            点击上方「扫码登录」或「Cookie 粘贴」添加您的首个账号
+          <h3 className="text-sm font-semibold text-[#f6f8fb]">{t("common.empty")}</h3>
+          <p className="text-xs text-[#778094] mt-1 max-w-sm">
+            {t("accounts.subtitle")}
           </p>
         </Card>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {items.map((acc) => (
-            <Card key={acc.id} className="p-4 space-y-4 hover:border-slate-700 transition-colors">
+            <Card key={acc.id} className="p-4 space-y-4 border-[#2a3341] bg-[#12161e] hover:border-[#fe2c55]/40 transition-colors">
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-11 h-11 rounded-full bg-slate-800 border border-slate-700 overflow-hidden shrink-0 flex items-center justify-center font-bold text-slate-300">
+                  <div className="w-11 h-11 rounded-full bg-[#181d27] border border-[#2a3341] overflow-hidden shrink-0 flex items-center justify-center font-bold text-[#f6f8fb]">
                     {acc.avatar ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={acc.avatar} alt={acc.nickname} className="w-full h-full object-cover" />
@@ -209,41 +209,42 @@ export function AccountsTab() {
                     )}
                   </div>
                   <div className="min-w-0">
-                    <div className="font-semibold text-sm text-slate-100 truncate">{acc.nickname}</div>
-                    <div className="text-xs text-slate-500 font-mono truncate">
+                    <div className="font-semibold text-sm text-[#f6f8fb] truncate">{acc.nickname}</div>
+                    <div className="text-xs text-[#778094] font-mono truncate">
                       ID: {acc.account_id || acc.id}
                     </div>
                   </div>
                 </div>
 
                 <Badge variant={acc.is_logged_in !== false ? "success" : "danger"}>
-                  {acc.is_logged_in !== false ? "有效" : "已失效"}
+                  {acc.is_logged_in !== false ? t("accounts.valid") : t("accounts.invalid")}
                 </Badge>
               </div>
 
-              <div className="grid grid-cols-3 gap-2 py-2 border-y border-slate-800 text-center">
+              <div className="grid grid-cols-3 gap-2 py-2 border-y border-[#1d2530] text-center">
                 <div>
-                  <div className="text-xs text-slate-500">作品</div>
-                  <div className="text-sm font-semibold text-slate-200 mt-0.5">{acc.works_count ?? 0}</div>
+                  <div className="text-xs text-[#778094]">{t("contents.title")}</div>
+                  <div className="text-sm font-semibold text-[#f6f8fb] mt-0.5">{acc.works_count ?? 0}</div>
                 </div>
                 <div>
-                  <div className="text-xs text-slate-500">获赞</div>
-                  <div className="text-sm font-semibold text-slate-200 mt-0.5">{acc.total_favorited ?? 0}</div>
+                  <div className="text-xs text-[#778094]">{t("contents.likes")}</div>
+                  <div className="text-sm font-semibold text-[#f6f8fb] mt-0.5">{acc.total_favorited ?? 0}</div>
                 </div>
                 <div>
-                  <div className="text-xs text-slate-500">粉丝</div>
-                  <div className="text-sm font-semibold text-slate-200 mt-0.5">{acc.follower_count ?? 0}</div>
+                  <div className="text-xs text-[#778094]">{t("hub.stats.followers")}</div>
+                  <div className="text-sm font-semibold text-[#f6f8fb] mt-0.5">{acc.follower_count ?? 0}</div>
                 </div>
               </div>
 
-              <div className="flex items-center justify-between gap-2 pt-1 text-xs text-slate-500">
-                <span>更新: {timeAgo(acc.updated_at)}</span>
+              <div className="flex items-center justify-between gap-2 pt-1 text-xs text-[#778094]">
+                <span>{timeAgo(acc.updated_at)}</span>
                 <div className="flex items-center gap-1.5">
                   <Button
                     variant="ghost"
                     size="icon"
                     onClick={() => handleSyncStats(acc.id)}
-                    title="同步最新数据"
+                    title={t("common.refresh")}
+                    className="h-7 w-7"
                   >
                     <RefreshCw className="w-3.5 h-3.5" />
                   </Button>
@@ -251,8 +252,8 @@ export function AccountsTab() {
                     variant="ghost"
                     size="icon"
                     onClick={() => handleDeleteAccount(acc.id)}
-                    className="hover:text-red-400"
-                    title="删除账号"
+                    className="h-7 w-7 hover:text-rose-400"
+                    title={t("common.delete")}
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                   </Button>
@@ -267,9 +268,9 @@ export function AccountsTab() {
       <Dialog open={qrModal.isOpen} onOpenChange={(open) => !open && dispatch(closeQrModal())}>
         <DialogContent className="sm:max-w-md text-center">
           <DialogHeader>
-            <DialogTitle>扫码登录</DialogTitle>
+            <DialogTitle>{t("accounts.qrLogin")}</DialogTitle>
             <DialogDescription>
-              {qrModal.mode === "creator" ? "创作者服务平台登录" : "客户端扫码授权"}
+              {qrModal.mode === "creator" ? t("accounts.creatorLoginDesc") : t("accounts.clientLoginDesc")}
             </DialogDescription>
           </DialogHeader>
 
@@ -279,14 +280,14 @@ export function AccountsTab() {
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={qrModal.qrUrl} alt="QR Code" className="w-full h-full object-contain" />
               ) : (
-                <div className="flex flex-col items-center gap-2 text-slate-500">
-                  <RefreshCw className="w-6 h-6 animate-spin text-blue-500" />
-                  <span className="text-xs">加载二维码中...</span>
+                <div className="flex flex-col items-center gap-2 text-[#778094]">
+                  <RefreshCw className="w-6 h-6 animate-spin text-[#fe2c55]" />
+                  <span className="text-xs">{t("common.loading")}</span>
                 </div>
               )}
             </div>
 
-            <p className="text-sm text-slate-300 font-medium">{qrModal.statusText}</p>
+            <p className="text-sm text-[#f6f8fb] font-medium">{qrModal.statusText}</p>
           </div>
         </DialogContent>
       </Dialog>
@@ -295,8 +296,8 @@ export function AccountsTab() {
       <Dialog open={cookieModal.isOpen} onOpenChange={(open) => !open && dispatch(closeCookieModal())}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>Cookie 粘贴导入</DialogTitle>
-            <DialogDescription>直接粘贴从浏览器抓取的 Cookie 字符串</DialogDescription>
+            <DialogTitle>{t("accounts.cookieLogin")}</DialogTitle>
+            <DialogDescription>{t("accounts.cookieLoginDesc")}</DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4 pt-2">
@@ -304,13 +305,15 @@ export function AccountsTab() {
               value={cookieText}
               onChange={(e) => setCookieText(e.target.value)}
               placeholder="sessionid=...; sid_guard=...;"
-              className="min-h-[140px] font-mono text-xs"
+              className="min-h-[140px] font-mono text-xs bg-[#0b0f16] border-[#2a3341]"
             />
             <div className="flex justify-end gap-2">
               <Button variant="ghost" onClick={() => dispatch(closeCookieModal())}>
-                取消
+                {t("common.cancel")}
               </Button>
-              <Button onClick={handleSaveCookie}>保存 Cookie</Button>
+              <Button onClick={handleSaveCookie} className="bg-[#fe2c55] hover:bg-[#fe2c55]/90 text-white">
+                {t("common.save")}
+              </Button>
             </div>
           </div>
         </DialogContent>

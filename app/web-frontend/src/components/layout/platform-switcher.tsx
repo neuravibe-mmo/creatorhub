@@ -4,17 +4,21 @@ import React from "react";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { setPlatform } from "@/store/slices/platformSlice";
 import { PLATFORMS } from "@/lib/constants";
-import { Platform } from "@/types";
 import { cn } from "@/lib/utils";
+import { useTranslation, TxKey } from "@/i18n";
 
 export function PlatformSwitcher() {
   const dispatch = useAppDispatch();
   const currentPlatform = useAppSelector((state) => state.platform.currentPlatform);
+  const { t } = useTranslation();
 
   return (
     <div className="inline-flex items-center gap-1 p-1 bg-[#12161e] border border-[#2a3341] rounded-full">
       {PLATFORMS.map((p) => {
         const isActive = currentPlatform === p.id;
+        const nameKey = `platforms.${p.id}` as TxKey;
+        const platformName = t(nameKey) || p.name;
+
         return (
           <button
             key={p.id}
@@ -33,7 +37,7 @@ export function PlatformSwitcher() {
             )}
           >
             {isActive && <span className="w-1.5 h-1.5 rounded-full bg-current" />}
-            <span>{p.name}</span>
+            <span>{platformName}</span>
           </button>
         );
       })}

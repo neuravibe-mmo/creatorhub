@@ -11,15 +11,16 @@ import { Button } from "@/components/ui/button";
 import { Input, Textarea } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Send, Upload, Clock, Sparkles, Hash } from "lucide-react";
+import { Send, Upload, Sparkles, Hash } from "lucide-react";
 import { timeAgo } from "@/lib/utils";
+import { useTranslation } from "@/i18n";
 
 export function PublishTab() {
   const dispatch = useAppDispatch();
   const currentPlatform = useAppSelector((state) => state.platform.currentPlatform);
   const accounts = useAppSelector((state) => state.accounts.items);
-  const { tasks, isLoading, crossPlatformModal } = useAppSelector((state) => state.publish);
+  const { tasks, isLoading } = useAppSelector((state) => state.publish);
+  const { t } = useTranslation();
 
   const [accountId, setAccountId] = useState("");
   const [title, setTitle] = useState("");
@@ -57,7 +58,7 @@ export function PublishTab() {
     try {
       const tagList = tags
         .split(/[,\s#]+/)
-        .map((t) => t.trim())
+        .map((tg) => tg.trim())
         .filter(Boolean);
 
       await api("/api/publish/tasks", {
@@ -73,13 +74,13 @@ export function PublishTab() {
         }),
       });
 
-      dispatch(addToast({ type: "ok", message: "发布任务已创建" }));
+      dispatch(addToast({ type: "ok", message: t("common.success") }));
       setTitle("");
       setDesc("");
       setTags("");
       loadTasks();
     } catch (e: any) {
-      dispatch(addToast({ type: "err", message: e.message || "创建任务失败" }));
+      dispatch(addToast({ type: "err", message: e.message || t("common.failed") }));
     } finally {
       dispatch(decrementBusy());
     }
@@ -88,25 +89,23 @@ export function PublishTab() {
   return (
     <div className="space-y-8">
       <div>
-        <h2 className="text-xl font-bold text-slate-100">发布管理</h2>
-        <p className="text-sm text-slate-400 mt-0.5">
-          创建作品发布任务，支持多图与视频上传、自动标签插入及定时发布
-        </p>
+        <h2 className="text-xl font-bold text-[#f6f8fb]">{t("publish.title")}</h2>
+        <p className="text-sm text-[#778094] mt-0.5">{t("publish.subtitle")}</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Publish Form */}
-        <Card className="lg:col-span-2 p-5 space-y-4">
-          <h3 className="text-base font-semibold text-slate-100">新建发布</h3>
+        <Card className="lg:col-span-2 p-5 space-y-4 border-[#2a3341] bg-[#12161e]">
+          <h3 className="text-base font-semibold text-[#f6f8fb]">{t("publish.title")}</h3>
 
-          <div className="space-y-3">
+          <div className="space-y-4">
             <div>
-              <label className="text-xs font-medium text-slate-400 block mb-1.5">发布账号</label>
+              <label className="text-xs font-medium text-[#778094] block mb-1.5">{t("publish.selectAccount")}</label>
               <Select value={accountId} onValueChange={setAccountId}>
-                <SelectTrigger>
-                  <SelectValue placeholder="选择发布账号" />
+                <SelectTrigger className="h-9 bg-[#0b0f16] border-[#2a3341] text-xs">
+                  <SelectValue placeholder={t("publish.selectAccount")} />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-[#12161e] border-[#2a3341]">
                   {accounts.map((a) => (
                     <SelectItem key={a.id} value={String(a.id)}>
                       {a.nickname} ({a.platform})
@@ -117,93 +116,76 @@ export function PublishTab() {
             </div>
 
             <div>
-              <label className="text-xs font-medium text-slate-400 block mb-1.5">作品标题</label>
+              <label className="text-xs font-medium text-[#778094] block mb-1.5">{t("publish.postTitle")}</label>
               <Input
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder="填写引人入胜的标题..."
+                placeholder={t("publish.titlePlaceholder")}
+                className="bg-[#0b0f16] border-[#2a3341] text-xs"
               />
             </div>
 
             <div>
-              <label className="text-xs font-medium text-slate-400 block mb-1.5">作品文案 / 描述</label>
+              <label className="text-xs font-medium text-[#778094] block mb-1.5">{t("publish.postContent")}</label>
               <Textarea
                 value={desc}
                 onChange={(e) => setDesc(e.target.value)}
-                placeholder="详细文案内容..."
-                className="min-h-[120px]"
+                placeholder={t("publish.contentPlaceholder")}
+                className="min-h-[100px] bg-[#0b0f16] border-[#2a3341] text-xs"
               />
             </div>
 
             <div>
-              <label className="text-xs font-medium text-slate-400 block mb-1.5">话题标签 (以空格或逗号分隔)</label>
-              <Input
-                value={tags}
-                onChange={(e) => setTags(e.target.value)}
-                placeholder="美食 日常 探店"
-              />
+              <label className="text-xs font-medium text-[#778094] block mb-1.5">{t("publish.topics")}</label>
+              <div className="relative">
+                <Hash className="w-4 h-4 text-[#778094] absolute left-3 top-1/2 -translate-y-1/2" />
+                <Input
+                  value={tags}
+                  onChange={(e) => setTags(e.target.value)}
+                  placeholder={t("publish.tagsPlaceholder")}
+                  className="pl-9 bg-[#0b0f16] border-[#2a3341] text-xs"
+                />
+              </div>
             </div>
 
-            <div className="pt-2">
-              <Button onClick={handleSubmitPublish} className="w-full gap-2">
+            <div className="pt-2 flex justify-end">
+              <Button onClick={handleSubmitPublish} className="gap-2 bg-[#fe2c55] hover:bg-[#fe2c55]/90 text-white text-xs">
                 <Send className="w-4 h-4" />
-                <span>立即发布 / 提交排队</span>
+                <span>{t("publish.publishNow")}</span>
               </Button>
             </div>
           </div>
         </Card>
 
-        {/* Recent Tasks */}
-        <Card className="p-5 space-y-4">
-          <h3 className="text-base font-semibold text-slate-100">任务队列</h3>
-          {tasks.length === 0 ? (
-            <div className="py-12 text-center text-xs text-slate-500">暂无排队中的发布任务</div>
-          ) : (
-            <div className="space-y-3 max-h-[450px] overflow-y-auto">
-              {tasks.map((task) => (
+        {/* Tasks Stream */}
+        <Card className="p-5 space-y-4 border-[#2a3341] bg-[#12161e]">
+          <h3 className="text-sm font-semibold text-[#f6f8fb]">{t("hub.tabs.publishHistory")}</h3>
+
+          <div className="space-y-3 max-h-[500px] overflow-y-auto pr-1">
+            {tasks.length === 0 ? (
+              <div className="p-8 text-center text-xs text-[#778094]">{t("common.empty")}</div>
+            ) : (
+              tasks.map((tsk) => (
                 <div
-                  key={task.id}
-                  className="p-3 rounded-lg bg-slate-800/40 border border-slate-800 space-y-1.5"
+                  key={tsk.id}
+                  className="p-3 rounded-[8px] bg-[#181d27]/60 border border-[#1d2530] space-y-1.5 text-xs"
                 >
                   <div className="flex items-center justify-between">
-                    <span className="font-semibold text-sm text-slate-200 truncate">{task.title}</span>
-                    <Badge variant={task.status === "published" ? "success" : "warning"}>
-                      {task.status}
+                    <span className="font-semibold text-[#f6f8fb] truncate max-w-[160px]">
+                      {tsk.title}
+                    </span>
+                    <Badge variant={tsk.status === "published" ? "success" : "secondary"}>
+                      {tsk.status}
                     </Badge>
                   </div>
-                  <div className="flex items-center justify-between text-xs text-slate-500">
-                    <span>{task.account_name || `账号 ${task.account_id}`}</span>
-                    <span>{timeAgo(task.created_at)}</span>
-                  </div>
+                  <div className="text-[11px] text-[#778094] truncate">{tsk.desc || "无描述"}</div>
+                  <div className="text-[10px] text-[#778094]">{timeAgo(tsk.created_at)}</div>
                 </div>
-              ))}
-            </div>
-          )}
+              ))
+            )}
+          </div>
         </Card>
       </div>
-
-      {/* Cross Platform Dialog */}
-      <Dialog
-        open={crossPlatformModal.isOpen}
-        onOpenChange={(open) => !open && dispatch(closeCrossPlatformModal())}
-      >
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>跨平台作品同步</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 pt-2">
-            <p className="text-xs text-slate-400">
-              将当前作品同步到小红书等平台发布
-            </p>
-            <div className="flex justify-end gap-2">
-              <Button variant="ghost" onClick={() => dispatch(closeCrossPlatformModal())}>
-                取消
-              </Button>
-              <Button onClick={() => dispatch(closeCrossPlatformModal())}>开始跨平台发布</Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

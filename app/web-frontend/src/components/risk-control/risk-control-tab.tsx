@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import { timeAgo } from "@/lib/utils";
 import { RiskAccountItem } from "@/types";
+import { useTranslation } from "@/i18n";
 
 const STATUS_MAP: Record<string, { label: string; tone: "success" | "danger" | "warning" | "secondary" }> = {
   normal: { label: "正常", tone: "success" },
@@ -42,6 +43,7 @@ export function RiskControlTab() {
   const dispatch = useAppDispatch();
   const currentPlatform = useAppSelector((state) => state.platform.currentPlatform);
   const { summary, accounts, config } = useAppSelector((state) => state.risk);
+  const { t } = useTranslation();
 
   // Search & Filter
   const [searchQuery, setSearchQuery] = useState("");
@@ -329,42 +331,42 @@ export function RiskControlTab() {
           <div className="text-2xl font-bold font-mono text-emerald-400 leading-none">
             {counts.normal ?? "—"}
           </div>
-          <div className="text-[11px] text-[#778094]">正常账号</div>
+          <div className="text-[11px] text-[#778094]">{t("risk.normalAccounts")}</div>
         </div>
 
         <div className="rounded-[14px] border border-[#2a3341] bg-[#12161e] p-3 text-center space-y-1 shadow-sm">
           <div className="text-2xl font-bold font-mono text-rose-400 leading-none">
             {(counts.cooldown || 0) + (counts.network_circuit || 0) + (counts.write_paused || 0)}
           </div>
-          <div className="text-[11px] text-[#778094]">冷却/暂停/熔断</div>
+          <div className="text-[11px] text-[#778094]">{t("risk.cooldownAccounts")}</div>
         </div>
 
         <div className="rounded-[14px] border border-[#2a3341] bg-[#12161e] p-3 text-center space-y-1 shadow-sm">
           <div className="text-2xl font-bold font-mono text-amber-400 leading-none">
             {counts.recovering ?? "—"}
           </div>
-          <div className="text-[11px] text-[#778094]">渐进恢复</div>
+          <div className="text-[11px] text-[#778094]">{t("risk.recoveringAccounts")}</div>
         </div>
 
         <div className="rounded-[14px] border border-[#2a3341] bg-[#12161e] p-3 text-center space-y-1 shadow-sm">
           <div className="text-2xl font-bold font-mono text-rose-400 leading-none">
             {(counts.auth_invalid || 0) + (counts.proxy_error || 0)}
           </div>
-          <div className="text-[11px] text-[#778094]">登录/代理异常</div>
+          <div className="text-[11px] text-[#778094]">{t("risk.invalidAccounts")}</div>
         </div>
 
         <div className="rounded-[14px] border border-[#2a3341] bg-[#12161e] p-3 text-center space-y-1 shadow-sm">
           <div className="text-2xl font-bold font-mono text-amber-400 leading-none">
             {summary?.blocked_tasks ?? "—"}
           </div>
-          <div className="text-[11px] text-[#778094]">受阻任务</div>
+          <div className="text-[11px] text-[#778094]">{t("risk.blockedTasks")}</div>
         </div>
 
         <div className="rounded-[14px] border border-[#2a3341] bg-[#12161e] p-3 text-center space-y-1 shadow-sm">
           <div className="text-2xl font-bold font-mono text-[#f6f8fb] leading-none">
             {summary?.risk_events_today ?? "—"}
           </div>
-          <div className="text-[11px] text-[#778094]">今日风险事件</div>
+          <div className="text-[11px] text-[#778094]">{t("risk.todayEvents")}</div>
         </div>
       </div>
 
@@ -376,7 +378,8 @@ export function RiskControlTab() {
               <Shield className="w-4 h-4" />
             </div>
             <h3 className="text-sm font-semibold text-[#f6f8fb]">
-              账号风险态势 <span className="text-xs text-[#778094] font-normal">状态、原因、恢复进度与待执行任务</span>
+              {t("risk.postureTitle")}{" "}
+              <span className="text-xs text-[#778094] font-normal">{t("risk.postureSub")}</span>
             </h3>
           </div>
 
@@ -387,14 +390,14 @@ export function RiskControlTab() {
             className="gap-1.5 text-xs text-[#778094] hover:text-[#f6f8fb]"
           >
             <RefreshCw className="w-3.5 h-3.5" />
-            <span>刷新状态</span>
+            <span>{t("common.refresh")}</span>
           </Button>
         </div>
 
         {/* Toolbar */}
         <div className="flex flex-wrap items-center gap-3">
           <Input
-            placeholder="搜索账号或原因"
+            placeholder={t("risk.searchPlaceholder")}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="h-8 max-w-[200px] bg-[#0b0f16] border-[#2a3341] text-xs"
@@ -403,23 +406,23 @@ export function RiskControlTab() {
           <div className="w-36">
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="h-8 bg-[#0b0f16] border-[#2a3341] text-xs">
-                <SelectValue placeholder="全部状态" />
+                <SelectValue placeholder={t("common.all")} />
               </SelectTrigger>
               <SelectContent className="bg-[#12161e] border-[#2a3341]">
-                <SelectItem value="all">全部状态</SelectItem>
-                <SelectItem value="normal">正常</SelectItem>
-                <SelectItem value="cooldown">风险冷却</SelectItem>
-                <SelectItem value="recovering">渐进恢复</SelectItem>
-                <SelectItem value="auth_invalid">登录失效</SelectItem>
-                <SelectItem value="proxy_error">代理异常</SelectItem>
-                <SelectItem value="network_circuit">网络熔断</SelectItem>
-                <SelectItem value="write_paused">写入暂停</SelectItem>
+                <SelectItem value="all">{t("common.all")}</SelectItem>
+                <SelectItem value="normal">{t("risk.statuses.normal")}</SelectItem>
+                <SelectItem value="cooldown">{t("risk.statuses.cooldown")}</SelectItem>
+                <SelectItem value="recovering">{t("risk.statuses.recovering")}</SelectItem>
+                <SelectItem value="auth_invalid">{t("risk.statuses.auth_invalid")}</SelectItem>
+                <SelectItem value="proxy_error">{t("risk.statuses.proxy_error")}</SelectItem>
+                <SelectItem value="network_circuit">{t("risk.statuses.network_circuit")}</SelectItem>
+                <SelectItem value="write_paused">{t("risk.statuses.write_paused")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           <span className="text-xs text-[#778094] ml-auto">
-            显示 {filteredAccounts.length} / {accounts.length}
+            {t("risk.showingCount", { current: filteredAccounts.length, total: accounts.length })}
           </span>
         </div>
 
@@ -428,22 +431,22 @@ export function RiskControlTab() {
           <table className="w-full text-left text-xs border-collapse">
             <thead>
               <tr className="border-b border-[#1d2530] text-[#778094]">
-                <th className="py-2.5 px-3 font-medium">账号</th>
-                <th className="py-2.5 px-3 font-medium">状态</th>
-                <th className="py-2.5 px-3 font-medium">等级</th>
-                <th className="py-2.5 px-3 font-medium">原因</th>
-                <th className="py-2.5 px-3 font-medium">冷却 / 探测</th>
-                <th className="py-2.5 px-3 font-medium">恢复</th>
-                <th className="py-2.5 px-3 font-medium">任务</th>
-                <th className="py-2.5 px-3 font-medium">网络</th>
-                <th className="py-2.5 px-3 font-medium text-right">操作</th>
+                <th className="py-2.5 px-3 font-medium">{t("risk.cols.account")}</th>
+                <th className="py-2.5 px-3 font-medium">{t("risk.cols.status")}</th>
+                <th className="py-2.5 px-3 font-medium">{t("risk.cols.level")}</th>
+                <th className="py-2.5 px-3 font-medium">{t("risk.cols.reason")}</th>
+                <th className="py-2.5 px-3 font-medium">{t("risk.cols.cooldownProbe")}</th>
+                <th className="py-2.5 px-3 font-medium">{t("risk.cols.recovery")}</th>
+                <th className="py-2.5 px-3 font-medium">{t("risk.cols.tasks")}</th>
+                <th className="py-2.5 px-3 font-medium">{t("risk.cols.network")}</th>
+                <th className="py-2.5 px-3 font-medium text-right">{t("risk.cols.actions")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#1d2530]">
               {filteredAccounts.length === 0 ? (
                 <tr>
                   <td colSpan={9} className="py-8 text-center text-[#778094]">
-                    没有匹配的账号状态，调整筛选条件或先添加平台账号
+                    {t("risk.emptyPosture")}
                   </td>
                 </tr>
               ) : (
@@ -486,7 +489,7 @@ export function RiskControlTab() {
                         ) : a.next_probe_at ? (
                           <span className="font-mono text-amber-400">{timeAgo(a.next_probe_at)} 探测</span>
                         ) : (
-                          <span className="text-[#778094]">无需等待</span>
+                          <span className="text-[#778094]">{t("risk.noWait")}</span>
                         )}
                       </td>
 
@@ -504,7 +507,7 @@ export function RiskControlTab() {
                       </td>
 
                       <td className="py-3 px-3 text-[#8b94a3]">
-                        <div>{a.proxy ? a.proxy : "本机直连"}</div>
+                        <div>{a.proxy ? a.proxy : t("risk.directConnect")}</div>
                       </td>
 
                       <td className="py-3 px-3 text-right">
@@ -515,7 +518,7 @@ export function RiskControlTab() {
                             onClick={() => handleProbeAccount(a.account_id)}
                             className="h-7 text-xs"
                           >
-                            探测
+                            {t("risk.btnProbe")}
                           </Button>
                           <Button
                             variant="ghost"
@@ -523,7 +526,7 @@ export function RiskControlTab() {
                             onClick={() => handleShowEvents(a.account_id)}
                             className="h-7 text-xs"
                           >
-                            记录
+                            {t("risk.btnEvents")}
                           </Button>
                           {a.status !== "normal" && (
                             <Button
@@ -532,7 +535,7 @@ export function RiskControlTab() {
                               onClick={() => openClearDialog(a.account_id)}
                               className="h-7 text-xs text-rose-400"
                             >
-                              解除
+                              {t("risk.btnClear")}
                             </Button>
                           )}
                         </div>
@@ -554,7 +557,8 @@ export function RiskControlTab() {
               <Sliders className="w-4 h-4" />
             </div>
             <h3 className="text-sm font-semibold text-[#f6f8fb]">
-              风控规则 <span className="text-xs text-[#778094] font-normal">保存后立即作用于后台调度</span>
+              {t("risk.rulesTitle")}{" "}
+              <span className="text-xs text-[#778094] font-normal">{t("risk.rulesSub")}</span>
             </h3>
           </div>
 
@@ -563,7 +567,7 @@ export function RiskControlTab() {
             className="gap-1.5 h-8 bg-[#fe2c55] hover:bg-[#fe2c55]/90 text-white text-xs"
           >
             <Check className="w-3.5 h-3.5" />
-            <span>保存并立即生效</span>
+            <span>{t("risk.saveRules")}</span>
           </Button>
         </div>
 
@@ -577,26 +581,26 @@ export function RiskControlTab() {
               className="rounded border-[#2a3341] bg-[#0b0f16] text-[#fe2c55]"
             />
             <div>
-              <div className="font-semibold text-[#f6f8fb]">启用统一风控</div>
-              <div className="text-[10px] text-[#778094]">关闭后不经过持久化风控闸门</div>
+              <div className="font-semibold text-[#f6f8fb]">{t("risk.enableRisk")}</div>
+              <div className="text-[10px] text-[#778094]">{t("risk.enableRiskDesc")}</div>
             </div>
           </label>
 
           <div>
-            <label className="text-[11px] font-medium text-[#778094] block mb-1">策略模式</label>
+            <label className="text-[11px] font-medium text-[#778094] block mb-1">{t("risk.mode")}</label>
             <Select value={riskMode} onValueChange={setRiskMode}>
               <SelectTrigger className="h-9 bg-[#0b0f16] border-[#2a3341] text-xs">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="bg-[#12161e] border-[#2a3341]">
-                <SelectItem value="conservative">保守模式（保留安全下限）</SelectItem>
-                <SelectItem value="custom">自定义模式</SelectItem>
+                <SelectItem value="conservative">{t("risk.conservative")}</SelectItem>
+                <SelectItem value="custom">{t("risk.custom")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           <div>
-            <label className="text-[11px] font-medium text-[#778094] block mb-1">事件保留天数</label>
+            <label className="text-[11px] font-medium text-[#778094] block mb-1">{t("risk.retentionDays")}</label>
             <Input
               type="number"
               min={1}
@@ -612,10 +616,10 @@ export function RiskControlTab() {
         <div className="space-y-4">
           {/* Fieldset 1: Read & Recovery */}
           <div className="p-4 rounded-[12px] bg-[#181d27]/60 border border-[#1d2530] space-y-3">
-            <div className="text-xs font-semibold text-[#f6f8fb]">读取与恢复策略</div>
+            <div className="text-xs font-semibold text-[#f6f8fb]">{t("risk.sectionRead")}</div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
               <div>
-                <label className="text-[10.5px] text-[#778094] block mb-1">轻量读取间隔（秒）</label>
+                <label className="text-[10.5px] text-[#778094] block mb-1">{t("risk.readLightGap")}</label>
                 <Input
                   type="number"
                   min={0}
@@ -626,7 +630,7 @@ export function RiskControlTab() {
               </div>
 
               <div>
-                <label className="text-[10.5px] text-[#778094] block mb-1">重读取间隔（秒）</label>
+                <label className="text-[10.5px] text-[#778094] block mb-1">{t("risk.readHeavyGap")}</label>
                 <Input
                   type="number"
                   min={0}
@@ -637,7 +641,7 @@ export function RiskControlTab() {
               </div>
 
               <div>
-                <label className="text-[10.5px] text-[#778094] block mb-1">恢复成功次数</label>
+                <label className="text-[10.5px] text-[#778094] block mb-1">{t("risk.recoveryCount")}</label>
                 <Input
                   type="number"
                   min={1}
@@ -649,7 +653,7 @@ export function RiskControlTab() {
               </div>
 
               <div>
-                <label className="text-[10.5px] text-[#778094] block mb-1">探测间隔（分钟）</label>
+                <label className="text-[10.5px] text-[#778094] block mb-1">{t("risk.probeGapMin")}</label>
                 <Input
                   type="number"
                   min={1}
@@ -660,7 +664,7 @@ export function RiskControlTab() {
               </div>
 
               <div>
-                <label className="text-[10.5px] text-[#778094] block mb-1">冷却阶梯（分钟）</label>
+                <label className="text-[10.5px] text-[#778094] block mb-1">{t("risk.cooldownSteps")}</label>
                 <Input
                   value={cooldownSteps}
                   onChange={(e) => setCooldownSteps(e.target.value)}
@@ -673,10 +677,10 @@ export function RiskControlTab() {
 
           {/* Fieldset 2: Network & Timing */}
           <div className="p-4 rounded-[12px] bg-[#181d27]/60 border border-[#1d2530] space-y-3">
-            <div className="text-xs font-semibold text-[#f6f8fb]">网络出口与时间策略</div>
+            <div className="text-xs font-semibold text-[#f6f8fb]">{t("risk.sectionNetwork")}</div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
               <div>
-                <label className="text-[10.5px] text-[#778094] block mb-1">同出口并发限制</label>
+                <label className="text-[10.5px] text-[#778094] block mb-1">{t("risk.networkConcurrency")}</label>
                 <Input
                   type="number"
                   min={1}
@@ -688,7 +692,7 @@ export function RiskControlTab() {
               </div>
 
               <div>
-                <label className="text-[10.5px] text-[#778094] block mb-1">熔断账号阈值</label>
+                <label className="text-[10.5px] text-[#778094] block mb-1">{t("risk.networkRiskAccounts")}</label>
                 <Input
                   type="number"
                   min={0}
@@ -699,7 +703,7 @@ export function RiskControlTab() {
               </div>
 
               <div>
-                <label className="text-[10.5px] text-[#778094] block mb-1">统计窗口（分钟）</label>
+                <label className="text-[10.5px] text-[#778094] block mb-1">{t("risk.networkWindowMin")}</label>
                 <Input
                   type="number"
                   min={1}
@@ -710,7 +714,7 @@ export function RiskControlTab() {
               </div>
 
               <div>
-                <label className="text-[10.5px] text-[#778094] block mb-1">出口冷却（分钟）</label>
+                <label className="text-[10.5px] text-[#778094] block mb-1">{t("risk.networkCooldownMin")}</label>
                 <Input
                   type="number"
                   min={1}
@@ -729,11 +733,11 @@ export function RiskControlTab() {
                   onChange={(e) => setQuietHoursEnabled(e.target.checked)}
                   className="rounded border-[#2a3341] bg-[#0b0f16] text-[#fe2c55]"
                 />
-                <span>启用写操作活跃时段</span>
+                <span>{t("risk.quietHoursEnabled")}</span>
               </label>
 
               <div>
-                <label className="text-[10.5px] text-[#778094] block mb-1">开始小时 (0-23)</label>
+                <label className="text-[10.5px] text-[#778094] block mb-1">{t("risk.activeHoursStart")}</label>
                 <Input
                   type="number"
                   min={0}
@@ -745,7 +749,7 @@ export function RiskControlTab() {
               </div>
 
               <div>
-                <label className="text-[10.5px] text-[#778094] block mb-1">结束小时 (1-24)</label>
+                <label className="text-[10.5px] text-[#778094] block mb-1">{t("risk.activeHoursEnd")}</label>
                 <Input
                   type="number"
                   min={1}
@@ -760,20 +764,20 @@ export function RiskControlTab() {
 
           {/* Fieldset 3: Write Limits Table */}
           <div className="p-4 rounded-[12px] bg-[#181d27]/60 border border-[#1d2530] space-y-3">
-            <div className="text-xs font-semibold text-[#f6f8fb]">写操作间隔与额度</div>
+            <div className="text-xs font-semibold text-[#f6f8fb]">{t("risk.sectionWrite")}</div>
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs border-collapse">
                 <thead>
                   <tr className="border-b border-[#1d2530] text-[#778094]">
-                    <th className="py-2 px-3 font-medium">操作类型</th>
-                    <th className="py-2 px-3 font-medium">最小间隔（分钟）</th>
-                    <th className="py-2 px-3 font-medium">每小时上限</th>
-                    <th className="py-2 px-3 font-medium">每日上限</th>
+                    <th className="py-2 px-3 font-medium">{t("risk.writeCols.actionType")}</th>
+                    <th className="py-2 px-3 font-medium">{t("risk.writeCols.minGapMin")}</th>
+                    <th className="py-2 px-3 font-medium">{t("risk.writeCols.hourlyCap")}</th>
+                    <th className="py-2 px-3 font-medium">{t("risk.writeCols.dailyCap")}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#1d2530]">
                   <tr>
-                    <td className="py-2.5 px-3 font-medium text-[#f6f8fb]">评论 / 回复</td>
+                    <td className="py-2.5 px-3 font-medium text-[#f6f8fb]">{t("risk.writeActions.comment")}</td>
                     <td className="py-2.5 px-3">
                       <Input
                         type="number"
@@ -804,7 +808,7 @@ export function RiskControlTab() {
                   </tr>
 
                   <tr>
-                    <td className="py-2.5 px-3 font-medium text-[#f6f8fb]">关注 / 取关</td>
+                    <td className="py-2.5 px-3 font-medium text-[#f6f8fb]">{t("risk.writeActions.social")}</td>
                     <td className="py-2.5 px-3">
                       <Input
                         type="number"
@@ -835,7 +839,7 @@ export function RiskControlTab() {
                   </tr>
 
                   <tr>
-                    <td className="py-2.5 px-3 font-medium text-[#f6f8fb]">私信</td>
+                    <td className="py-2.5 px-3 font-medium text-[#f6f8fb]">{t("risk.writeActions.dm")}</td>
                     <td className="py-2.5 px-3">
                       <Input
                         type="number"
@@ -866,7 +870,7 @@ export function RiskControlTab() {
                   </tr>
 
                   <tr>
-                    <td className="py-2.5 px-3 font-medium text-[#f6f8fb]">发布</td>
+                    <td className="py-2.5 px-3 font-medium text-[#f6f8fb]">{t("risk.writeActions.publish")}</td>
                     <td className="py-2.5 px-3">
                       <Input
                         type="number"
@@ -901,7 +905,7 @@ export function RiskControlTab() {
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
               <div>
-                <label className="text-[10.5px] text-[#778094] block mb-1">共享写间隔（分钟）</label>
+                <label className="text-[10.5px] text-[#778094] block mb-1">{t("risk.sharedWriteMin")}</label>
                 <Input
                   type="number"
                   min={0}
@@ -912,7 +916,7 @@ export function RiskControlTab() {
               </div>
 
               <div>
-                <label className="text-[10.5px] text-[#778094] block mb-1">综合动作小时上限</label>
+                <label className="text-[10.5px] text-[#778094] block mb-1">{t("risk.combinedHourly")}</label>
                 <Input
                   type="number"
                   min={0}
@@ -923,7 +927,7 @@ export function RiskControlTab() {
               </div>
 
               <div>
-                <label className="text-[10.5px] text-[#778094] block mb-1">综合动作每日上限</label>
+                <label className="text-[10.5px] text-[#778094] block mb-1">{t("risk.combinedDaily")}</label>
                 <Input
                   type="number"
                   min={0}
@@ -938,9 +942,7 @@ export function RiskControlTab() {
 
         <div className="flex items-center gap-2 p-3 rounded-[10px] bg-[#181d27] border border-[#1d2530] text-xs text-[#8b94a3]">
           <Info className="w-4 h-4 shrink-0 text-[#38bdf8]" />
-          <span>
-            保守模式会强制保留评论、社交、私信、发布和共享写入间隔的安全下限；需要完全按输入值运行时选择自定义模式。
-          </span>
+          <span>{t("risk.conservativeTip")}</span>
         </div>
       </div>
 
@@ -948,15 +950,15 @@ export function RiskControlTab() {
       <Dialog open={eventsModalOpen} onOpenChange={setEventsModalOpen}>
         <DialogContent className="sm:max-w-xl">
           <DialogHeader>
-            <DialogTitle>风险事件记录</DialogTitle>
+            <DialogTitle>{t("risk.eventsModalTitle")}</DialogTitle>
             <DialogDescription>
-              最近 {accountEvents.length} 条 · 不保存响应正文或账号凭据
+              {t("risk.eventsModalDesc", { count: accountEvents.length })}
             </DialogDescription>
           </DialogHeader>
 
           <div className="max-h-[420px] overflow-y-auto space-y-2 pr-1 pt-2">
             {accountEvents.length === 0 ? (
-              <div className="p-8 text-center text-xs text-[#778094]">暂无风险记录</div>
+              <div className="p-8 text-center text-xs text-[#778094]">{t("risk.emptyEvents")}</div>
             ) : (
               accountEvents.map((evt, idx) => (
                 <div
@@ -969,7 +971,7 @@ export function RiskControlTab() {
                       {evt.outcome}
                     </Badge>
                   </div>
-                  <div className="text-[11px] text-[#8b94a3]">{evt.detail || evt.signal || "无补充说明"}</div>
+                  <div className="text-[11px] text-[#8b94a3]">{evt.detail || evt.signal || t("risk.noDetail")}</div>
                   <div className="text-[10px] text-[#778094] font-mono">{timeAgo(evt.occurred_at)}</div>
                 </div>
               ))
@@ -982,29 +984,29 @@ export function RiskControlTab() {
       <Dialog open={clearModalOpen} onOpenChange={setClearModalOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>解除账号风控状态</DialogTitle>
+            <DialogTitle>{t("risk.clearModalTitle")}</DialogTitle>
             <DialogDescription>
-              请说明已对该账号完成的人工检查。解除后待执行任务可能继续运行。
+              {t("risk.clearModalDesc")}
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4 pt-2">
             <div>
-              <label className="text-[11px] font-medium text-[#778094] block mb-1">解除原因</label>
+              <label className="text-[11px] font-medium text-[#778094] block mb-1">{t("risk.clearReasonLabel")}</label>
               <Input
                 value={clearReason}
                 onChange={(e) => setClearReason(e.target.value)}
-                placeholder="例如：已完成验证码并确认代理出口正常"
+                placeholder={t("risk.clearReasonPlaceholder")}
                 className="h-9 bg-[#0b0f16] border-[#2a3341] text-xs"
               />
             </div>
 
             <div className="flex justify-end gap-2">
               <Button variant="ghost" onClick={() => setClearModalOpen(false)}>
-                取消
+                {t("common.cancel")}
               </Button>
               <Button onClick={handleConfirmClear} className="bg-rose-600 hover:bg-rose-700 text-white">
-                确认解除
+                {t("risk.confirmClear")}
               </Button>
             </div>
           </div>

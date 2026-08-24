@@ -8,9 +8,11 @@ import { Button } from "@/components/ui/button";
 import { Input, Textarea } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Download, Check, Eye, EyeOff, Info, Zap } from "lucide-react";
+import { useTranslation } from "@/i18n";
 
 export function SettingsTab() {
   const dispatch = useAppDispatch();
+  const { t } = useTranslation();
 
   // Download settings
   const [downloadDir, setDownloadDir] = useState("");
@@ -158,37 +160,38 @@ export function SettingsTab() {
             <Download className="w-4 h-4" />
           </div>
           <h3 className="text-sm font-semibold text-[#f6f8fb]">
-            下载设置 <span className="text-xs text-[#778094] font-normal">全局默认</span>
+            {t("settings.downloadTitle")}{" "}
+            <span className="text-xs text-[#778094] font-normal">{t("settings.downloadSub")}</span>
           </h3>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="text-[11px] font-medium text-[#778094] block mb-1">默认下载目录</label>
+            <label className="text-[11px] font-medium text-[#778094] block mb-1">{t("settings.defaultDir")}</label>
             <Input
               value={downloadDir}
               onChange={(e) => setDownloadDir(e.target.value)}
               placeholder="例如 D:\douyin\downloads；留空使用 ./data/media"
               className="h-9 bg-[#0b0f16] border-[#2a3341] text-xs font-mono"
             />
-            <div className="text-[10px] text-[#778094] mt-1">系统会在该目录下按作者昵称自动创建子文件夹</div>
+            <div className="text-[10px] text-[#778094] mt-1">{t("settings.dirHelp")}</div>
           </div>
 
           <div>
-            <label className="text-[11px] font-medium text-[#778094] block mb-1">默认视频画质</label>
+            <label className="text-[11px] font-medium text-[#778094] block mb-1">{t("settings.defaultQuality")}</label>
             <Select value={videoQuality} onValueChange={setVideoQuality}>
               <SelectTrigger className="h-9 bg-[#0b0f16] border-[#2a3341] text-xs">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="bg-[#12161e] border-[#2a3341]">
-                <SelectItem value="highest">原画 / 最高</SelectItem>
-                <SelectItem value="1080">1080P</SelectItem>
-                <SelectItem value="720">720P</SelectItem>
-                <SelectItem value="540">540P</SelectItem>
-                <SelectItem value="lowest">最低省流</SelectItem>
+                <SelectItem value="highest">{t("shareDownload.qualities.highest")}</SelectItem>
+                <SelectItem value="1080">{t("shareDownload.qualities.p1080")}</SelectItem>
+                <SelectItem value="720">{t("shareDownload.qualities.p720")}</SelectItem>
+                <SelectItem value="540">{t("shareDownload.qualities.p540")}</SelectItem>
+                <SelectItem value="lowest">{t("shareDownload.qualities.lowest")}</SelectItem>
               </SelectContent>
             </Select>
-            <div className="text-[10px] text-[#778094] mt-1">单个监控目标可单独覆盖</div>
+            <div className="text-[10px] text-[#778094] mt-1">{t("settings.qualityHelp")}</div>
           </div>
         </div>
 
@@ -196,10 +199,10 @@ export function SettingsTab() {
           <span className="text-xs text-[#34d399] font-medium">{dlMsg}</span>
           <Button
             onClick={handleSaveDownloadSettings}
-            className="gap-1.5 h-8 bg-[#fe2c55] hover:bg-[#fe2c55]/90 text-xs"
+            className="gap-1.5 h-8 bg-[#fe2c55] hover:bg-[#fe2c55]/90 text-xs text-white"
           >
             <Check className="w-3.5 h-3.5" />
-            <span>保存下载设置</span>
+            <span>{t("settings.saveDownload")}</span>
           </Button>
         </div>
       </div>
@@ -211,7 +214,8 @@ export function SettingsTab() {
             <Zap className="w-4 h-4" />
           </div>
           <h3 className="text-sm font-semibold text-[#f6f8fb]">
-            大模型 API <span className="text-xs text-[#778094] font-normal">自动评论文案生成(OpenAI 兼容接口)</span>
+            {t("settings.aiTitle")}{" "}
+            <span className="text-xs text-[#778094] font-normal">{t("settings.aiSub")}</span>
           </h3>
         </div>
 
@@ -225,15 +229,15 @@ export function SettingsTab() {
               className="rounded border-[#2a3341] bg-[#0b0f16] text-[#fe2c55]"
             />
             <div>
-              <div className="font-semibold text-xs text-[#f6f8fb]">启用大模型生成文案</div>
-              <div className="text-[11px] text-[#778094]">关闭后只使用规则中的本地模板库</div>
+              <div className="font-semibold text-xs text-[#f6f8fb]">{t("settings.enableAi")}</div>
+              <div className="text-[11px] text-[#778094]">{t("settings.enableAiDesc")}</div>
             </div>
           </label>
 
           {/* Form Grid 4 Cols */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             <div>
-              <label className="text-[11px] font-medium text-[#778094] block mb-1">接口地址</label>
+              <label className="text-[11px] font-medium text-[#778094] block mb-1">{t("settings.baseUrl")}</label>
               <Input
                 value={aiBaseUrl}
                 onChange={(e) => setAiBaseUrl(e.target.value)}
@@ -243,7 +247,7 @@ export function SettingsTab() {
             </div>
 
             <div>
-              <label className="text-[11px] font-medium text-[#778094] block mb-1">模型名称</label>
+              <label className="text-[11px] font-medium text-[#778094] block mb-1">{t("settings.modelName")}</label>
               <Input
                 value={aiModel}
                 onChange={(e) => setAiModel(e.target.value)}
@@ -253,7 +257,7 @@ export function SettingsTab() {
             </div>
 
             <div>
-              <label className="text-[11px] font-medium text-[#778094] block mb-1">API Key</label>
+              <label className="text-[11px] font-medium text-[#778094] block mb-1">{t("settings.apiKey")}</label>
               <div className="relative">
                 <Input
                   type={showApiKey ? "text" : "password"}
@@ -270,11 +274,11 @@ export function SettingsTab() {
                   {showApiKey ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                 </button>
               </div>
-              <div className="text-[10px] text-[#778094] mt-1">仅保存在本地数据库，不会回显</div>
+              <div className="text-[10px] text-[#778094] mt-1">{t("settings.apiKeyHelp")}</div>
             </div>
 
             <div>
-              <label className="text-[11px] font-medium text-[#778094] block mb-1">生成温度</label>
+              <label className="text-[11px] font-medium text-[#778094] block mb-1">{t("settings.temperature")}</label>
               <Input
                 type="number"
                 step="0.1"
@@ -285,29 +289,25 @@ export function SettingsTab() {
                 placeholder="0.9"
                 className="h-9 bg-[#0b0f16] border-[#2a3341] text-xs font-mono"
               />
-              <div className="text-[10px] text-[#778094] mt-1">建议 0.7–1.0；数值越高表达越多</div>
+              <div className="text-[10px] text-[#778094] mt-1">{t("settings.tempHelp")}</div>
             </div>
           </div>
 
           <div>
-            <label className="text-[11px] font-medium text-[#778094] block mb-1">提示词模板</label>
+            <label className="text-[11px] font-medium text-[#778094] block mb-1">{t("settings.promptTemplate")}</label>
             <Textarea
               value={aiPrompt}
               onChange={(e) => setAiPrompt(e.target.value)}
-              placeholder="留空使用内置提示词"
+              placeholder={t("settings.promptPlaceholder")}
               rows={3}
               className="bg-[#0b0f16] border-[#2a3341] text-xs font-mono"
             />
-            <div className="text-[10px] text-[#778094] mt-1">
-              可用变量：{"{source_text}"}、{"{nick}"}、{"{kw}"}、{"{platform}"}、{"{kind_label}"}
-            </div>
+            <div className="text-[10px] text-[#778094] mt-1">{t("settings.promptHelp")}</div>
           </div>
 
           <div className="flex items-start gap-2 p-3 rounded-[10px] bg-[#181d27] border border-[#1d2530] text-xs text-[#8b94a3]">
             <Info className="w-4 h-4 shrink-0 text-[#38bdf8] mt-0.5" />
-            <span>
-              兼容 OpenAI <code className="text-[#38bdf8] bg-[#0b0f16] px-1 py-0.5 rounded">/chat/completions</code> 的服务。调用失败时会自动回退到当前规则的模板库。
-            </span>
+            <span>{t("settings.callout")}</span>
           </div>
 
           {/* Test AI Result */}
@@ -343,7 +343,7 @@ export function SettingsTab() {
                 className="gap-1.5 text-xs text-[#e7eaf0] border-[#2a3341] bg-[#181d27]"
               >
                 <Zap className="w-3.5 h-3.5 text-[#38bdf8]" />
-                <span>测试连通性</span>
+                <span>{t("settings.testAi")}</span>
               </Button>
 
               <Button
@@ -352,7 +352,7 @@ export function SettingsTab() {
                 className="gap-1.5 text-xs bg-[#fe2c55] hover:bg-[#fe2c55]/90 text-white"
               >
                 <Check className="w-3.5 h-3.5" />
-                <span>保存 AI 设置</span>
+                <span>{t("settings.saveAi")}</span>
               </Button>
             </div>
           </div>

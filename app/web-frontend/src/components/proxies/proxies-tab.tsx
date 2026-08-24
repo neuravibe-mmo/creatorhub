@@ -17,12 +17,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Network, Plus, Play, Trash2, CheckCircle2, XCircle, ArrowRightLeft } from "lucide-react";
+import { Network, Plus, Play, Trash2, ArrowRightLeft } from "lucide-react";
+import { useTranslation } from "@/i18n";
 
 export function ProxiesTab() {
   const dispatch = useAppDispatch();
   const { items, isLoading, testingMap, addModal } = useAppSelector((state) => state.proxies);
   const [proxyUrl, setProxyUrl] = useState("");
+  const { t } = useTranslation();
 
   const loadProxies = async () => {
     dispatch(setLoading(true));
@@ -48,10 +50,10 @@ export function ProxiesTab() {
       });
       dispatch(closeAddModal());
       setProxyUrl("");
-      dispatch(addToast({ type: "ok", message: "代理已加入代理池" }));
+      dispatch(addToast({ type: "ok", message: t("common.success") }));
       loadProxies();
     } catch (e: any) {
-      dispatch(addToast({ type: "err", message: e.message || "添加失败" }));
+      dispatch(addToast({ type: "err", message: e.message || t("common.failed") }));
     } finally {
       dispatch(decrementBusy());
     }
@@ -68,7 +70,7 @@ export function ProxiesTab() {
       if (res.ok) {
         dispatch(addToast({ type: "ok", message: `连通正常 (${res.latency_ms || 0}ms)` }));
       } else {
-        dispatch(addToast({ type: "err", message: "代理连通失败" }));
+        dispatch(addToast({ type: "err", message: t("common.failed") }));
       }
     } catch {
       dispatch(setTestStatus({ url, status: "failed" }));
@@ -76,9 +78,10 @@ export function ProxiesTab() {
   };
 
   const handleDeleteProxy = async (id: number) => {
+    if (!confirm(t("common.confirm") + "?")) return;
     try {
       await api(`/api/proxies/${id}`, { method: "DELETE" });
-      dispatch(addToast({ type: "ok", message: "已移除代理" }));
+      dispatch(addToast({ type: "ok", message: t("common.success") }));
       loadProxies();
     } catch {}
   };
@@ -87,10 +90,10 @@ export function ProxiesTab() {
     dispatch(incrementBusy("正在批量分配代理..."));
     try {
       await api("/api/proxies/assign-all", { method: "POST" });
-      dispatch(addToast({ type: "ok", message: "代理已均衡分配到各账号" }));
+      dispatch(addToast({ type: "ok", message: t("common.success") }));
       loadProxies();
     } catch (e: any) {
-      dispatch(addToast({ type: "err", message: e.message || "分配失败" }));
+      dispatch(addToast({ type: "err", message: e.message || t("common.failed") }));
     } finally {
       dispatch(decrementBusy());
     }
@@ -100,69 +103,91 @@ export function ProxiesTab() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-bold text-slate-100">代理池管理</h2>
-          <p className="text-sm text-slate-400 mt-0.5">
-            配置 HTTP / SOCKS5 静态或动态代理，实现账号多出口 IP 隔离与防关联
-          </p>
+          <h2 className="text-xl font-bold text-[#f6f8fb]">{t("proxies.title")}</h2>
+          <p className="text-sm text-[#778094] mt-0.5">{t("proxies.subtitle")}</p>
         </div>
 
         <div className="flex items-center gap-2.5">
-          <Button onClick={() => dispatch(openAddModal())} className="gap-2">
+          <Button onClick={() => dispatch(openAddModal())} className="gap-2 bg-[#fe2c55] hover:bg-[#fe2c55]/90 text-white">
             <Plus className="w-4 h-4" />
-            <span>加入代理池</span>
+            <span>{t("proxies.addProxy")}</span>
           </Button>
-          <Button variant="secondary" onClick={handleAssignAll} className="gap-2">
+          <Button variant="secondary" onClick={handleAssignAll} className="gap-2 border-[#2a3341] bg-[#181d27] text-[#e7eaf0]">
             <ArrowRightLeft className="w-4 h-4" />
-            <span>为未配账号批量分配</span>
+            <span>自动均衡分配</span>
           </Button>
         </div>
       </div>
 
-      {items.length === 0 ? (
-        <Card className="p-12 text-center text-slate-500 border-dashed">
-          代理池为空，添加代理可有效降低账号风控风险
+      {isLoading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {[1, 2, 3].map((i) => (
+            <Card key={i} className="h-36 animate-pulse border-[#2a3341] bg-[#12161e]" />
+          ))}
+        </div>
+      ) : items.length === 0 ? (
+        <Card className="flex flex-col items-center justify-center p-12 text-center border-dashed border-[#2a3341] bg-[#12161e]">
+          <div className="w-12 h-12 rounded-full bg-[#181d27] flex items-center justify-center text-[#778094] mb-3">
+            <Network className="w-6 h-6" />
+          </div>
+          <h3 className="text-sm font-semibold text-[#f6f8fb]">{t("common.empty")}</h3>
+          <p className="text-xs text-[#778094] mt-1 max-w-sm">
+            {t("proxies.subtitle")}
+          </p>
         </Card>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {items.map((p, idx) => {
-            const status = testingMap[p.url];
+          {items.map((prx) => {
+            const testStatus = testingMap[prx.url];
             return (
-              <Card key={p.id || idx} className="p-4 space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Network className="w-4 h-4 text-blue-400" />
-                    <span className="font-mono text-xs text-slate-300 font-semibold truncate max-w-[200px]">
-                      {p.url}
-                    </span>
+              <Card key={prx.id} className="p-4 space-y-4 border-[#2a3341] bg-[#12161e] hover:border-[#fe2c55]/40 transition-colors">
+                <div className="flex items-start justify-between">
+                  <div className="space-y-1 min-w-0">
+                    <div className="font-mono text-xs font-semibold text-[#f6f8fb] truncate">
+                      {prx.url}
+                    </div>
+                    <div className="text-[11px] text-[#778094]">
+                      绑定的账号数: {prx.assigned_count ?? 0}
+                    </div>
                   </div>
-                  {status === "ok" ? (
-                    <Badge variant="success">正常</Badge>
-                  ) : status === "failed" ? (
-                    <Badge variant="danger">失效</Badge>
-                  ) : (
-                    <Badge variant="secondary">{p.protocol || "HTTP"}</Badge>
-                  )}
+
+                  <Badge
+                    variant={
+                      testStatus === "ok"
+                        ? "success"
+                        : testStatus === "failed"
+                        ? "danger"
+                        : "secondary"
+                    }
+                  >
+                    {testStatus === "testing"
+                      ? "测试中..."
+                      : testStatus === "ok"
+                      ? "畅通"
+                      : testStatus === "failed"
+                      ? "超时"
+                      : "未测"}
+                  </Badge>
                 </div>
 
-                <div className="flex items-center justify-between text-xs text-slate-500 pt-2 border-t border-slate-800">
-                  <span>已分配账号: {p.assigned_count ?? 0}</span>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleTestProxy(p.url)}
-                      loading={status === "testing"}
-                      className="text-xs"
-                    >
-                      测试
-                    </Button>
-                    <button
-                      onClick={() => p.id && handleDeleteProxy(p.id)}
-                      className="text-slate-500 hover:text-rose-400"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
+                <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#1d2530]">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleTestProxy(prx.url)}
+                    className="gap-1.5 text-xs text-[#38bdf8]"
+                  >
+                    <Play className="w-3 h-3" />
+                    <span>{t("proxies.testLatency")}</span>
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => prx.id !== undefined && handleDeleteProxy(prx.id)}
+                    className="h-7 w-7 text-[#778094] hover:text-rose-400"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </Button>
                 </div>
               </Card>
             );
@@ -174,19 +199,22 @@ export function ProxiesTab() {
       <Dialog open={addModal.isOpen} onOpenChange={(open) => !open && dispatch(closeAddModal())}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>加入代理池</DialogTitle>
+            <DialogTitle>{t("proxies.addProxy")}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 pt-2">
             <Input
               value={proxyUrl}
               onChange={(e) => setProxyUrl(e.target.value)}
               placeholder="http://user:pass@host:port 或 socks5://host:port"
+              className="bg-[#0b0f16] border-[#2a3341] text-xs font-mono"
             />
             <div className="flex justify-end gap-2">
               <Button variant="ghost" onClick={() => dispatch(closeAddModal())}>
-                取消
+                {t("common.cancel")}
               </Button>
-              <Button onClick={handleAddProxy}>确认加入</Button>
+              <Button onClick={handleAddProxy} className="bg-[#fe2c55] hover:bg-[#fe2c55]/90 text-white">
+                {t("common.confirm")}
+              </Button>
             </div>
           </div>
         </DialogContent>

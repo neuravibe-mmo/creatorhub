@@ -20,12 +20,14 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Download, Heart, MessageSquare, Video, Image, CheckSquare, Square, Search } from "lucide-react";
 import { timeAgo } from "@/lib/utils";
+import { useTranslation } from "@/i18n";
 
 export function ContentsTab() {
   const dispatch = useAppDispatch();
   const currentPlatform = useAppSelector((state) => state.platform.currentPlatform);
   const { items, page, pageSize, total, selectedIds, filterMediaType, searchQuery } =
     useAppSelector((state) => state.contents);
+  const { t } = useTranslation();
 
   const loadContents = async () => {
     try {
@@ -50,10 +52,10 @@ export function ContentsTab() {
     dispatch(incrementBusy("正在下载媒体文件..."));
     try {
       await api(`/api/contents/${item.id}/download`, { method: "POST" });
-      dispatch(addToast({ type: "ok", message: "下载已完成" }));
+      dispatch(addToast({ type: "ok", message: t("common.success") }));
       loadContents();
     } catch (e: any) {
-      dispatch(addToast({ type: "err", message: e.message || "下载失败" }));
+      dispatch(addToast({ type: "err", message: e.message || t("common.failed") }));
     } finally {
       dispatch(decrementBusy());
     }
@@ -67,11 +69,11 @@ export function ContentsTab() {
         method: "POST",
         body: JSON.stringify({ ids: selectedIds }),
       });
-      dispatch(addToast({ type: "ok", message: "批量下载已触发" }));
+      dispatch(addToast({ type: "ok", message: t("common.success") }));
       dispatch(clearSelectedIds());
       loadContents();
     } catch (e: any) {
-      dispatch(addToast({ type: "err", message: e.message || "下载失败" }));
+      dispatch(addToast({ type: "err", message: e.message || t("common.failed") }));
     } finally {
       dispatch(decrementBusy());
     }
@@ -83,33 +85,31 @@ export function ContentsTab() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-bold text-slate-100">内容列表</h2>
-          <p className="text-sm text-slate-400 mt-0.5">
-            浏览所有抓取到的图文与视频作品，支持高清原图与无水印视频下载
-          </p>
+          <h2 className="text-xl font-bold text-[#f6f8fb]">{t("contents.title")}</h2>
+          <p className="text-sm text-[#778094] mt-0.5">{t("pageContext.contents.desc")}</p>
         </div>
 
         {selectedIds.length > 0 && (
-          <div className="flex items-center gap-3 bg-blue-600/10 border border-blue-500/20 px-3 py-1.5 rounded-lg">
-            <span className="text-xs text-blue-300 font-medium">已选择 {selectedIds.length} 项</span>
-            <Button size="sm" onClick={handleBatchDownload} className="gap-1.5 text-xs">
+          <div className="flex items-center gap-3 bg-[#fe2c55]/10 border border-[#fe2c55]/20 px-3 py-1.5 rounded-lg">
+            <span className="text-xs text-[#fe2c55] font-medium">已选择 {selectedIds.length} 项</span>
+            <Button size="sm" onClick={handleBatchDownload} className="gap-1.5 text-xs bg-[#fe2c55] hover:bg-[#fe2c55]/90 text-white">
               <Download className="w-3.5 h-3.5" />
-              <span>批量下载</span>
+              <span>{t("contents.downloadVideo")}</span>
             </Button>
           </div>
         )}
       </div>
 
       {/* Filters Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-3 p-3 bg-slate-900/60 border border-slate-800 rounded-lg">
+      <div className="flex flex-wrap items-center justify-between gap-3 p-3 bg-[#12161e] border border-[#2a3341] rounded-[12px]">
         <div className="flex items-center gap-3 flex-1 min-w-[240px] max-w-md">
           <div className="relative w-full">
-            <Search className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+            <Search className="w-4 h-4 text-[#778094] absolute left-3 top-1/2 -translate-y-1/2" />
             <Input
               value={searchQuery}
               onChange={(e) => dispatch(setSearchQuery(e.target.value))}
-              placeholder="搜索作品标题或博主..."
-              className="pl-9 text-xs"
+              placeholder={t("contents.searchTitle")}
+              className="pl-9 text-xs bg-[#0b0f16] border-[#2a3341]"
             />
           </div>
         </div>
@@ -118,13 +118,13 @@ export function ContentsTab() {
           <div className="w-36">
             <Select
               value={filterMediaType}
-              onValueChange={(v) => dispatch(setFilterMediaType(v === "all" ? "" : v))}
+              onValueChange={(val) => dispatch(setFilterMediaType(val === "all" ? "" : val))}
             >
-              <SelectTrigger>
-                <SelectValue placeholder="全部类型" />
+              <SelectTrigger className="h-9 bg-[#0b0f16] border-[#2a3341] text-xs">
+                <SelectValue placeholder={t("common.all")} />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">全部类型</SelectItem>
+              <SelectContent className="bg-[#12161e] border-[#2a3341]">
+                <SelectItem value="all">{t("common.all")}</SelectItem>
                 <SelectItem value="video">视频</SelectItem>
                 <SelectItem value="image">图集</SelectItem>
               </SelectContent>
@@ -139,18 +139,17 @@ export function ContentsTab() {
                 ? dispatch(clearSelectedIds())
                 : dispatch(selectAllIds(items.map((i) => String(i.id))))
             }
-            className="gap-1.5 text-xs"
+            className="gap-2 text-xs border-[#2a3341] bg-[#0b0f16] text-[#8b94a3]"
           >
-            {allSelected ? <CheckSquare className="w-3.5 h-3.5" /> : <Square className="w-3.5 h-3.5" />}
-            <span>{allSelected ? "取消全选" : "全选当前页"}</span>
+            {allSelected ? <CheckSquare className="w-4 h-4 text-[#fe2c55]" /> : <Square className="w-4 h-4" />}
+            <span>{allSelected ? "取消全选" : "全选本页"}</span>
           </Button>
         </div>
       </div>
 
-      {/* Content Grid */}
       {items.length === 0 ? (
-        <Card className="p-12 text-center text-slate-500 border-dashed">
-          暂无作品数据，请先通过「作品监控」或「关键词采集」抓取内容
+        <Card className="p-12 text-center text-[#778094] border-dashed border-[#2a3341] bg-[#12161e]">
+          {t("common.empty")}
         </Card>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -159,86 +158,72 @@ export function ContentsTab() {
             return (
               <Card
                 key={item.id}
-                className={`p-3 space-y-3 group overflow-hidden transition-all ${
-                  isSelected ? "border-blue-500 bg-blue-950/20" : ""
+                className={`p-3 space-y-3 relative group transition-all border-[#2a3341] bg-[#12161e] ${
+                  isSelected ? "border-[#fe2c55] bg-[#fe2c55]/5" : "hover:border-[#fe2c55]/40"
                 }`}
               >
-                <div className="aspect-[4/3] rounded-md bg-slate-800 overflow-hidden relative">
-                  <div
-                    className="w-full h-full cursor-pointer"
-                    onClick={() =>
-                      dispatch(
-                        openLightbox({
-                          images:
-                            item.images && item.images.length > 0
-                              ? item.images
-                              : [item.cover_url || ""],
-                        })
-                      )
-                    }
-                  >
-                    {item.cover_url ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={item.cover_url}
-                        alt={item.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-slate-600">
-                        {item.media_type === "video" ? (
-                          <Video className="w-8 h-8" />
-                        ) : (
-                          <Image className="w-8 h-8" />
-                        )}
-                      </div>
-                    )}
-                  </div>
+                <button
+                  onClick={() => dispatch(toggleSelectId(String(item.id)))}
+                  className="absolute top-4 left-4 z-10 p-1.5 rounded bg-black/60 text-white"
+                >
+                  {isSelected ? (
+                    <CheckSquare className="w-4 h-4 text-[#fe2c55]" />
+                  ) : (
+                    <Square className="w-4 h-4 text-slate-300" />
+                  )}
+                </button>
 
-                  <button
-                    onClick={() => dispatch(toggleSelectId(String(item.id)))}
-                    className="absolute top-2 left-2 p-1.5 rounded-md bg-black/60 text-white backdrop-blur-sm hover:bg-black/80"
-                  >
-                    {isSelected ? (
-                      <CheckSquare className="w-4 h-4 text-blue-400" />
-                    ) : (
-                      <Square className="w-4 h-4 text-slate-300" />
-                    )}
-                  </button>
-
-                  <span className="absolute top-2 right-2 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-black/60 text-white backdrop-blur-sm">
-                    {item.media_type === "video" ? "视频" : "图集"}
-                  </span>
+                <div
+                  className="aspect-[3/4] bg-[#0b0f16] rounded-md overflow-hidden relative cursor-pointer"
+                  onClick={() =>
+                    item.images && item.images.length > 0
+                      ? dispatch(openLightbox({ images: item.images }))
+                      : item.cover_url && dispatch(openLightbox({ images: [item.cover_url] }))
+                  }
+                >
+                  {item.cover_url ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={item.cover_url}
+                      alt={item.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-[#778094]">
+                      {item.media_type === "video" ? <Video className="w-8 h-8" /> : <Image className="w-8 h-8" />}
+                    </div>
+                  )}
                 </div>
 
-                <div>
-                  <h4 className="text-sm font-semibold text-slate-100 line-clamp-2">{item.title}</h4>
-                  <div className="flex items-center justify-between text-xs text-slate-500 mt-2">
-                    <span className="truncate max-w-[120px]">@{item.author_name || "作者"}</span>
-                    <span>{timeAgo(item.publish_time || item.created_at)}</span>
+                <div className="space-y-1">
+                  <div className="font-semibold text-xs text-[#f6f8fb] line-clamp-2" title={item.title}>
+                    {item.title || "无标题作品"}
+                  </div>
+                  <div className="text-[11px] text-[#778094] flex items-center justify-between">
+                    <span>@{item.author_name}</span>
+                    <span>{timeAgo(item.publish_time)}</span>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between pt-2 border-t border-[#1d2530] text-[11px] text-[#778094]">
+                  <div className="flex items-center gap-3">
+                    <span className="flex items-center gap-1">
+                      <Heart className="w-3.5 h-3.5" /> {item.like_count ?? 0}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <MessageSquare className="w-3.5 h-3.5" /> {item.comment_count ?? 0}
+                    </span>
                   </div>
 
-                  <div className="flex items-center justify-between pt-2 border-t border-slate-800/80 mt-2 text-xs text-slate-400">
-                    <div className="flex items-center gap-3">
-                      <span className="flex items-center gap-1">
-                        <Heart className="w-3 h-3 text-rose-400" />
-                        {item.like_count ?? 0}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <MessageSquare className="w-3 h-3 text-blue-400" />
-                        {item.comment_count ?? 0}
-                      </span>
-                    </div>
-
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleDownloadSingle(item)}
-                      title="下载媒体"
-                    >
-                      <Download className="w-3.5 h-3.5 text-slate-300 hover:text-white" />
-                    </Button>
-                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => handleDownloadSingle(item)}
+                    className="h-7 w-7 text-[#778094] hover:text-[#f6f8fb]"
+                    title={t("contents.downloadVideo")}
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                  </Button>
                 </div>
               </Card>
             );

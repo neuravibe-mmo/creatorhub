@@ -6,10 +6,13 @@ import { setTab } from "@/store/slices/platformSlice";
 import { api } from "@/lib/api";
 import { User, Target, Download, MessageSquare, ChevronRight, Zap } from "lucide-react";
 import { addToast, incrementBusy, decrementBusy } from "@/store/slices/uiSlice";
+import { useTranslation } from "@/i18n";
 
 export function OverviewTab() {
   const dispatch = useAppDispatch();
   const currentPlatform = useAppSelector((state) => state.platform.currentPlatform);
+  const { t } = useTranslation();
+
   const [stats, setStats] = useState({
     accountsCount: 0,
     monitorsCount: 0,
@@ -70,25 +73,25 @@ export function OverviewTab() {
 
   const kpis = [
     {
-      title: "已登录账号",
+      title: t("overview.stats.accounts"),
       value: stats.accountsCount,
       icon: User,
       color: "bg-[#38bdf8]/15 text-[#38bdf8]",
     },
     {
-      title: "监控中目标",
+      title: t("overview.stats.monitors"),
       value: stats.monitorsCount,
       icon: Target,
       color: "bg-[#fe2c55]/15 text-[#fe2c55]",
     },
     {
-      title: "已下载作品",
+      title: t("overview.stats.contents"),
       value: stats.contentsCount,
       icon: Download,
       color: "bg-[#34d399]/15 text-[#34d399]",
     },
     {
-      title: "抓取评论",
+      title: t("overview.stats.comments"),
       value: stats.commentsCount,
       icon: MessageSquare,
       color: "bg-[#fbbf24]/15 text-[#fbbf24]",
@@ -128,15 +131,15 @@ export function OverviewTab() {
             <div className="flex items-center gap-2">
               <Zap className="w-4 h-4 text-[#fe2c55]" />
               <h3 className="text-sm font-semibold text-[#f6f8fb]">
-                近 7 天采集 <span className="text-xs text-[#778094] font-normal">每日新增作品 / 评论</span>
+                {t("overview.recentWorks")} <span className="text-xs text-[#778094] font-normal">7-Day Activity</span>
               </h3>
             </div>
             <div className="flex items-center gap-4 text-xs">
               <span className="flex items-center gap-1.5 text-[#8b94a3]">
-                <span className="w-2.5 h-2.5 rounded-sm bg-[#fe2c55]" /> 作品
+                <span className="w-2.5 h-2.5 rounded-sm bg-[#fe2c55]" /> {t("nav.contents")}
               </span>
               <span className="flex items-center gap-1.5 text-[#8b94a3]">
-                <span className="w-2.5 h-2.5 rounded-sm bg-[#38bdf8]" /> 评论
+                <span className="w-2.5 h-2.5 rounded-sm bg-[#38bdf8]" /> {t("nav.comments")}
               </span>
             </div>
           </div>
@@ -148,12 +151,12 @@ export function OverviewTab() {
                   <div
                     className="w-3 bg-[#fe2c55] rounded-t transition-all duration-300"
                     style={{ height: `${(d.works / 50) * 100}%` }}
-                    title={`作品: ${d.works}`}
+                    title={`Works: ${d.works}`}
                   />
                   <div
                     className="w-3 bg-[#38bdf8] rounded-t transition-all duration-300"
                     style={{ height: `${(d.comments / 150) * 100}%` }}
-                    title={`评论: ${d.comments}`}
+                    title={`Comments: ${d.comments}`}
                   />
                 </div>
                 <span className="text-[11px] text-[#778094] font-mono">{d.day}</span>
@@ -167,7 +170,7 @@ export function OverviewTab() {
           <div className="flex items-center gap-2 pb-3 border-b border-[#1d2530]">
             <Zap className="w-4 h-4 text-[#fe2c55]" />
             <h3 className="text-sm font-semibold text-[#f6f8fb]">
-              快捷操作 <span className="text-xs text-[#778094] font-normal">常用入口</span>
+              {t("overview.quickActions")}
             </h3>
           </div>
 
@@ -181,8 +184,8 @@ export function OverviewTab() {
                   <User className="w-4 h-4" />
                 </div>
                 <div>
-                  <div className="font-semibold text-xs text-[#f6f8fb]">管理平台账号</div>
-                  <div className="text-[11px] text-[#778094]">登录、检查状态与配置代理</div>
+                  <div className="font-semibold text-xs text-[#f6f8fb]">{t("accounts.title")}</div>
+                  <div className="text-[11px] text-[#778094]">{t("accounts.subtitle")}</div>
                 </div>
               </div>
               <ChevronRight className="w-4 h-4 text-[#778094] group-hover:text-[#f6f8fb] transition-colors" />
@@ -197,8 +200,8 @@ export function OverviewTab() {
                   <Target className="w-4 h-4" />
                 </div>
                 <div>
-                  <div className="font-semibold text-xs text-[#f6f8fb]">添加作品监控</div>
-                  <div className="text-[11px] text-[#778094]">设置目标与自动下载策略</div>
+                  <div className="font-semibold text-xs text-[#f6f8fb]">{t("monitors.addMonitor")}</div>
+                  <div className="text-[11px] text-[#778094]">{t("monitors.subtitle")}</div>
                 </div>
               </div>
               <ChevronRight className="w-4 h-4 text-[#778094] group-hover:text-[#f6f8fb] transition-colors" />
@@ -213,8 +216,8 @@ export function OverviewTab() {
                   <Download className="w-4 h-4" />
                 </div>
                 <div>
-                  <div className="font-semibold text-xs text-[#f6f8fb]">解析分享链接</div>
-                  <div className="text-[11px] text-[#778094]">识别作品并保存到本地</div>
+                  <div className="font-semibold text-xs text-[#f6f8fb]">{t("shareDownload.cardTitle")}</div>
+                  <div className="text-[11px] text-[#778094]">{t("shareDownload.cardSub")}</div>
                 </div>
               </div>
               <ChevronRight className="w-4 h-4 text-[#778094] group-hover:text-[#f6f8fb] transition-colors" />
@@ -229,8 +232,8 @@ export function OverviewTab() {
                   <Download className="w-4 h-4" />
                 </div>
                 <div>
-                  <div className="font-semibold text-xs text-[#f6f8fb]">导出监控报告</div>
-                  <div className="text-[11px] text-[#778094]">整理为 Excel 报表</div>
+                  <div className="font-semibold text-xs text-[#f6f8fb]">{t("header.exportMonitorReport")}</div>
+                  <div className="text-[11px] text-[#778094]">Excel (.xlsx)</div>
                 </div>
               </div>
               <ChevronRight className="w-4 h-4 text-[#778094] group-hover:text-[#f6f8fb] transition-colors" />

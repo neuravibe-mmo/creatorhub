@@ -2,14 +2,17 @@
 
 import React from "react";
 import { PlatformSwitcher } from "./platform-switcher";
+import { LanguageSwitcher } from "./language-switcher";
 import { Button } from "@/components/ui/button";
-import { Download, Sparkles, Activity } from "lucide-react";
+import { Download } from "lucide-react";
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
 import { addToast, incrementBusy, decrementBusy } from "@/store/slices/uiSlice";
+import { useTranslation } from "@/i18n";
 
 export function Header() {
   const dispatch = useAppDispatch();
   const currentPlatform = useAppSelector((state) => state.platform.currentPlatform);
+  const { t } = useTranslation();
 
   const handleExportReport = async () => {
     dispatch(incrementBusy("正在导出 Excel 报告..."));
@@ -47,12 +50,12 @@ export function Header() {
           </div>
           <div className="flex flex-col">
             <div className="flex items-center gap-1.5">
-              <span className="font-bold text-[16px] text-[#f6f8fb] tracking-tight">CreatorHub</span>
+              <span className="font-bold text-[16px] text-[#f6f8fb] tracking-tight">{t("header.title")}</span>
               <span className="text-[10px] font-bold text-[#fe2c55] bg-[#fe2c55]/15 px-1.5 py-0.5 rounded-[5px]">
-                LITE
+                {t("header.badge")}
               </span>
             </div>
-            <span className="text-[10.5px] text-[#778094] leading-tight">多平台内容工作台</span>
+            <span className="text-[10.5px] text-[#778094] leading-tight">{t("header.subtitle")}</span>
           </div>
         </div>
 
@@ -60,11 +63,14 @@ export function Header() {
         <PlatformSwitcher />
       </div>
 
-      <div className="flex items-center gap-3.5">
+      <div className="flex items-center gap-3">
+        {/* Language Switcher */}
+        <LanguageSwitcher />
+
         {/* Engine status */}
         <div className="inline-flex items-center gap-2 text-xs text-[#8b94a3] px-3 py-1.5 rounded-full border border-[#2a3341] bg-[#12161e]">
           <span className="w-2 h-2 rounded-full bg-[#34d399] animate-pulse" />
-          <span className="font-medium">引擎运行中</span>
+          <span className="font-medium">{t("header.engineRunning")}</span>
         </div>
 
         <Button
@@ -74,7 +80,7 @@ export function Header() {
           className="gap-1.5 text-xs text-[#8b94a3] hover:text-[#f6f8fb] border-[#2a3341] bg-[#12161e] rounded-full h-8"
         >
           <Download className="w-3.5 h-3.5" />
-          <span>导出监控报告</span>
+          <span>{t("header.exportMonitorReport")}</span>
         </Button>
       </div>
     </header>
