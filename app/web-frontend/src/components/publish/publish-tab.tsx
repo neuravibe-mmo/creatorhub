@@ -31,7 +31,7 @@ export function PublishTab() {
   const loadTasks = async () => {
     dispatch(setLoading(true));
     try {
-      const data = await api<PublishTask[]>(`/api/publish/tasks?platform=${currentPlatform}`);
+      const data = await api<PublishTask[]>(`/api/publish?platform=${currentPlatform}`);
       dispatch(setTasks(data || []));
     } catch { } finally {
       dispatch(setLoading(false));
@@ -61,7 +61,7 @@ export function PublishTab() {
         .map((tg) => tg.trim())
         .filter(Boolean);
 
-      await api("/api/publish/tasks", {
+      await api("/api/publish", {
         method: "POST",
         body: JSON.stringify({
           platform: currentPlatform,
