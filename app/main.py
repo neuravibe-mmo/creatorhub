@@ -6857,10 +6857,15 @@ async def test_channel(cid: int):
 @app.get("/", response_class=HTMLResponse)
 async def index():
     html = (WEB_DIR / "index.html").read_text(encoding="utf-8")
-    # 给 app.js 带上基于 mtime 的版本号,前端改动后自动击穿浏览器缓存(免手动强刷)
+    # 给静态 JS 带上基于 mtime 的版本号,前端改动后自动击穿浏览器缓存(免手动强刷)
     try:
-        ver = int((WEB_DIR / "app.js").stat().st_mtime)
-        html = html.replace("/static/app.js", f"/static/app.js?v={ver}")
+        import re
+        def _ver_replace(match):
+            js_rel = match.group(1)
+            target = WEB_DIR / js_rel
+            v = int(target.stat().st_mtime) if target.exists() else int((WEB_DIR / "index.html").stat().st_mtime)
+            return f'/static/{js_rel}?v={v}'
+        html = re.sub(r'/static/([a-zA-Z0-9_\-/]+\.js)', _ver_replace, html)
     except Exception:
         pass
     # 首页(含内联 CSS)禁缓存:否则 webview 缓存旧 HTML,改了样式也不生效

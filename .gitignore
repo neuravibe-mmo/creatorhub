@@ -9,8 +9,10 @@ __pycache__/
 venv/
 env/
 
-# Node (xhs publish signing deps)
+# Node (xhs publish signing deps & frontend)
 node_modules/
+.next/
+*.bak
 _site/
 
 # IDE
